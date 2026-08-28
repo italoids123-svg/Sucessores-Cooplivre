@@ -8,7 +8,7 @@ import { LEVEL_GROUPS } from "@/lib/data";
 import { hasAnyData, successorsFor } from "@/lib/scoring";
 import type { PageKey } from "@/lib/types";
 
-const PAGE_META: Record<PageKey, { title: string; desc: string; searchPlaceholder: string }> = {
+const PAGE_META: Record<PageKey, { title: string; desc: string; searchPlaceholder: string; showDiretoriaFilter?: boolean }> = {
   directors: {
     title: "Diretoria",
     desc: "C-Level (CEO) e Diretoria Executiva estatutária, conforme Regimento Interno.",
@@ -23,6 +23,13 @@ const PAGE_META: Record<PageKey, { title: string; desc: string; searchPlaceholde
     title: "Gerência",
     desc: "Gerências de agência e áreas administrativas — pool de elegibilidade para a Gerência Executiva.",
     searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
+    showDiretoriaFilter: true,
+  },
+  coordenacao: {
+    title: "Coordenação e Especialistas",
+    desc: "Posições de coordenação e especialistas — um nível abaixo da Gerência na régua de elegibilidade.",
+    searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
+    showDiretoriaFilter: true,
   },
 };
 
@@ -146,7 +153,7 @@ export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
           value={search}
           onChange={(ev) => setSearch(ev.target.value)}
         />
-        {pageKey === "management" ? (
+        {meta.showDiretoriaFilter ? (
           <select value={diretoriaFilter} onChange={(ev) => setDiretoriaFilter(ev.target.value)}>
             <option value="">Todas as diretorias</option>
             {diretorias.map((d) => (

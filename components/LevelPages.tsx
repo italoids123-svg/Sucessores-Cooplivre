@@ -13,6 +13,7 @@ export default function LevelPages() {
       <LevelPage key={`directors-${dataVersion}`} pageKey="directors" />
       <LevelPage key={`executive-${dataVersion}`} pageKey="executive" />
       <LevelPage key={`management-${dataVersion}`} pageKey="management" />
+      <LevelPage key={`coordenacao-${dataVersion}`} pageKey="coordenacao" />
     </>
   );
 }

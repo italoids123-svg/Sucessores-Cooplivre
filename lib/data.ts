@@ -35,6 +35,11 @@ export const CHAIRS: Chair[] = [
   { id: "c032", nome: "Shirlei Aparecida Rossi Ambrozin", cargo: "Gerente de P.A.", nivel: "Gerência", diretoria: "Negócios", cidade: "Capivari", tempoCasa: 7.4, prefixLocalidade: true },
   { id: "c033", nome: "Sidnei Roberto Betarelli", cargo: "Gerente de P.A.", nivel: "Gerência", diretoria: "Negócios", cidade: "Elias Fausto", tempoCasa: 5.6, prefixLocalidade: true },
   { id: "c034", nome: "Uilian Fernando Ribeiro", cargo: "Gerente de P.A.", nivel: "Gerência", diretoria: "Negócios", cidade: "Porangaba", tempoCasa: 2.4, prefixLocalidade: true },
+  { id: "c035", nome: "Leila Regina da Silva", cargo: "Coordenador de Agronegocios", nivel: "Coordenação", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false },
+  { id: "c036", nome: "Renan Henrique Oliveira Muller", cargo: "Coordenador de Comunicação e Marketing", nivel: "Coordenação", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false },
+  { id: "c037", nome: "Gabriella Fernanda Nichols", cargo: "Coordenador de Governança Corporativa", nivel: "Coordenação", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false },
+  { id: "c038", nome: "Larisse de Paula", cargo: "Coordenador de Recuperação de Crédito", nivel: "Coordenação", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false },
+  { id: "c039", nome: "Renato Alves da Silva", cargo: "Coordenador de Suprimentos", nivel: "Coordenação", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false },
 ];
 
 export const PEOPLE: Person[] = [
@@ -71,11 +76,11 @@ export const PEOPLE: Person[] = [
   { id: "P032", nome: "Shirlei Aparecida Rossi Ambrozin", nivel: "Gerência", cargo: "Gerente de P.A.", diretoria: "Negócios", chairId: "c032" },
   { id: "P033", nome: "Sidnei Roberto Betarelli", nivel: "Gerência", cargo: "Gerente de P.A.", diretoria: "Negócios", chairId: "c033" },
   { id: "P034", nome: "Uilian Fernando Ribeiro", nivel: "Gerência", cargo: "Gerente de P.A.", diretoria: "Negócios", chairId: "c034" },
-  { id: "P035", nome: "Leila Regina da Silva", nivel: "Coordenação", cargo: "Coordenador de Agronegocios", diretoria: "Negócios", chairId: null },
-  { id: "P036", nome: "Renan Henrique Oliveira Muller", nivel: "Coordenação", cargo: "Coordenador de Comunicação e Marketing", diretoria: "Negócios", chairId: null },
-  { id: "P037", nome: "Gabriella Fernanda Nichols", nivel: "Coordenação", cargo: "Coordenador de Governança Corporativa", diretoria: "Administrativa", chairId: null },
-  { id: "P038", nome: "Larisse de Paula", nivel: "Coordenação", cargo: "Coordenador de Recuperação de Crédito", diretoria: "Financeira", chairId: null },
-  { id: "P039", nome: "Renato Alves da Silva", nivel: "Coordenação", cargo: "Coordenador de Suprimentos", diretoria: "Administrativa", chairId: null },
+  { id: "P035", nome: "Leila Regina da Silva", nivel: "Coordenação", cargo: "Coordenador de Agronegocios", diretoria: "Negócios", chairId: "c035" },
+  { id: "P036", nome: "Renan Henrique Oliveira Muller", nivel: "Coordenação", cargo: "Coordenador de Comunicação e Marketing", diretoria: "Negócios", chairId: "c036" },
+  { id: "P037", nome: "Gabriella Fernanda Nichols", nivel: "Coordenação", cargo: "Coordenador de Governança Corporativa", diretoria: "Administrativa", chairId: "c037" },
+  { id: "P038", nome: "Larisse de Paula", nivel: "Coordenação", cargo: "Coordenador de Recuperação de Crédito", diretoria: "Financeira", chairId: "c038" },
+  { id: "P039", nome: "Renato Alves da Silva", nivel: "Coordenação", cargo: "Coordenador de Suprimentos", diretoria: "Administrativa", chairId: "c039" },
 ];
 
 export const HIERARQUIA: HierarquiaEntry[] = [
@@ -89,4 +94,5 @@ export const LEVEL_GROUPS: Record<PageKey, string[]> = {
   directors: ["C-Level", "Diretoria"],
   executive: ["Gerência Executiva"],
   management: ["Gerência"],
+  coordenacao: ["Coordenação", "Especialista"],
 };
