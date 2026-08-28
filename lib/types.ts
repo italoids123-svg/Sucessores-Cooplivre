@@ -33,7 +33,8 @@ export type Horizonte = "imediato" | "ate3" | "3a5" | "mais5" | "";
 export type Mobilidade = "local" | "sede" | "raio40" | "qualquer" | "";
 export type ConversaDesenvolvimento = "andamento" | "sem_formalizar" | "nao" | "";
 export type Continuidade = "imediata" | "com_suporte" | "nao_identifico" | "sem_elementos" | "";
-export type NineBoxCode = "A1" | "B1" | "C1" | "A2" | "B2" | "C2" | "A3" | "B3" | "C3" | "N/A" | "";
+// Nome do quadrante da matriz 9Box (ex.: "Estrela", "Alto Potencial"), "" quando não avaliado.
+export type NineBoxCode = string;
 
 export interface SuccessionRecord {
   prioridade1?: string;
@@ -46,10 +47,9 @@ export interface SuccessionRecord {
   conversaDesenvolvimento?: ConversaDesenvolvimento;
   continuidade?: Continuidade;
   possivelSucessorTexto?: string;
-  nineBox2024?: NineBoxCode;
   nineBox2025?: NineBoxCode;
+  nineBox2026?: NineBoxCode;
   lideraEquipe?: boolean;
-  favorabilidade2025?: number | string;
   favorabilidade2026?: number | string;
 }
 

@@ -17,14 +17,16 @@ export default function CriteriaPage() {
       </div>
       <div className="criteria-grid">
         <article className="criterion card">
-          <h3>Nine Box (2024–2025)</h3>
+          <h3>Nine Box (2025–2026)</h3>
           <div className="weight">Peso: 40 pontos no modelo</div>
           <table>
             <tbody>
               {CRITERIA.nineBox.scale.map((x) => (
                 <tr key={x.code}>
                   <td>
-                    {x.code} · {x.label}
+                    {x.label}
+                    <br />
+                    <span style={{ fontSize: "10.5px", color: "var(--muted)" }}>{x.sub}</span>
                   </td>
                   <td>{x.points} pts</td>
                 </tr>
@@ -32,8 +34,12 @@ export default function CriteriaPage() {
             </tbody>
           </table>
           <div className="note">
-            Nota final = 2024 × 37,5% + 2025 × 62,5%. Se só um dos dois anos estiver preenchido, esse ano vale 100%
-            até o segundo ser coletado.
+            Eixos da matriz: cortes em 3,00 e 4,00 nos dois eixos — Baixo ≤ 3,00 · Médio entre 3,00 e 4,00 · Alto ≥
+            4,00.
+            <br />
+            <br />
+            Nota final = 2025 × 37,5% + 2026 × 62,5%. Se só um dos dois ciclos estiver preenchido, esse ciclo vale
+            100% até o outro ser coletado.
           </div>
         </article>
 
@@ -76,9 +82,8 @@ export default function CriteriaPage() {
             </tbody>
           </table>
           <div className="note">
-            Fonte: favorabilidade do time que a pessoa lidera, no corte de gestão imediata do relatório GPTW —
-            ciclos 2025 e 2026. Nota final = 2025 × 37,5% + 2026 × 62,5%; se só um ciclo estiver preenchido, esse
-            ciclo vale 100%.
+            Fonte: favorabilidade do time que a pessoa lidera, no corte de gestão imediata do relatório GPTW — ciclo
+            único 2026, sem ponderação entre anos.
             <br />
             <br />
             Quem não lidera equipe, ou lidera mas teve o corte suprimido pelo GPTW (time com menos de 5 pessoas), não

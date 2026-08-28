@@ -1,9 +1,9 @@
 import * as XLSX from "xlsx";
 import { CONT_LABELS, CONV_LABELS, CRITERIA } from "./criteria";
-import { INT_MAP, MOB_MAP, NB_MAP, normCargo, normName } from "./scoring";
+import { INT_MAP, MOB_MAP, nbResolve, normCargo, normName } from "./scoring";
 import type { Chair, Person, SuccessionMap, SuccessionRecord } from "./types";
 
-const NB_CODES = CRITERIA.nineBox.scale.map((x) => x.code);
+const NB_REF_LINES = CRITERIA.nineBox.scale.map((x) => `${x.label} — ${x.sub} — ${x.points} pts`);
 const INT_LABELS = CRITERIA.interesse.scale.map((x) => x.label);
 const MOB_LABELS = CRITERIA.mobilidade.scale.map((x) => x.label);
 const INT_LABEL_TO_KEY = Object.fromEntries(CRITERIA.interesse.scale.map((x) => [x.label.toLowerCase(), x.key]));
@@ -27,9 +27,9 @@ const LEIAME_ROWS: (string[])[] = [
   ["Prioridade de interesse 1 / 2", 'Preencha com o Cargo exato de uma cadeira da aba Cadeiras — é assim que o dashboard casa candidato com posição. A Prioridade 2 é opcional (segunda posição de interesse). Copie o texto da aba "Valores aceitos" para evitar divergência de digitação.'],
   ["Horizonte da prioridade 1 / 2", "Use exatamente um destes textos: " + INT_LABELS.join(" / ") + ". Vale para a posição correspondente (1 ou 2)."],
   ["Desenvolvimento para a prioridade 1 / 2", "Resposta aberta — competências, conhecimentos ou experiências a fortalecer para aquela posição específica. Não gera pontos; alimenta o detalhamento da pessoa no mapa."],
-  ["Nine Box 2024 / Nine Box 2025", "Use um dos códigos: A1, B1, C1, A2, B2, C2, A3, B3 ou C3. Em branco equivale a Não avaliado = 0 ponto. A nota final pondera 2024 em 37,5% e 2025 em 62,5%."],
+  ["Nine Box 2025 / Nine Box 2026", "Use exatamente um dos quadrantes da matriz 9Box da Cooplivre (ver aba Valores aceitos). Em branco equivale a Não avaliado = 0 ponto. A nota final pondera 2025 em 37,5% e 2026 em 62,5%; se só um ciclo estiver preenchido, esse ciclo vale 100%."],
   ["Lidera equipe (Sim/Não)", "Indica se a pessoa tem equipe direta. Só quem lidera equipe é avaliado no critério Favorabilidade do time."],
-  ["Favorabilidade do time 2025 / 2026 (%)", "Percentual de 0 a 100 da favorabilidade do TIME QUE A PESSOA LIDERA, no corte de gestão imediata do relatório GPTW (ciclos 2025 e 2026). Faixas: 85 ou mais = 10 pts / 76 a 84 = 7 pts / 68 a 75 = 4 pts / abaixo de 68 = 1 pt. Nota final = 2025 × 37,5% + 2026 × 62,5%; se só um ciclo estiver preenchido, esse ciclo vale 100%. Deixe EM BRANCO quando o GPTW suprimiu o corte (time com menos de 5 pessoas) — não invente nem estime valor."],
+  ["Favorabilidade do time 2026 (%)", "Percentual de 0 a 100 da favorabilidade do TIME QUE A PESSOA LIDERA, no corte de gestão imediata do relatório GPTW — ciclo único 2026, sem ponderação entre anos. Faixas: 85 ou mais = 10 pts / 76 a 84 = 7 pts / 68 a 75 = 4 pts / abaixo de 68 = 1 pt. Deixe EM BRANCO quando o GPTW suprimiu o corte (time com menos de 5 pessoas) — não invente nem estime valor."],
   ["Normalização da pontuação", "A soma bruta dos critérios não é o score final. O score é: pontos obtidos ÷ pontos aplicáveis × 100. Quem lidera equipe e tem favorabilidade preenchida disputa em 100 pontos aplicáveis. Quem não lidera equipe, ou lidera mas está sem favorabilidade, disputa em 90 pontos aplicáveis — não recebe zero no critério, ele simplesmente não se aplica. O corte de elegibilidade de " + CRITERIA.eligibilityThreshold + " é lido sobre esse percentual de aproveitamento."],
   ["Mobilidade", "Use exatamente um destes textos: " + MOB_LABELS.join(" / ") + "."],
   ["Conversa sobre desenvolvimento", "Use exatamente um destes textos: " + Object.values(CONV_LABELS).join(" / ") + "."],
@@ -68,15 +68,14 @@ export function buildWorkbook(chairs: Chair[], people: Person[], hierarquia: { n
       "Conversa sobre desenvolvimento": s.conversaDesenvolvimento ? CONV_LABELS[s.conversaDesenvolvimento] || "" : "",
       "Continuidade da posição atual": s.continuidade ? CONT_LABELS[s.continuidade] || "" : "",
       "Possível sucessor da posição atual": s.possivelSucessorTexto || "",
-      "Nine Box 2024": s.nineBox2024 || "",
       "Nine Box 2025": s.nineBox2025 || "",
+      "Nine Box 2026": s.nineBox2026 || "",
       "Lidera equipe (Sim/Não)": s.lideraEquipe === true ? "Sim" : s.lideraEquipe === false ? "Não" : "",
-      "Favorabilidade do time 2025 (%)": s.favorabilidade2025 === undefined ? "" : s.favorabilidade2025,
       "Favorabilidade do time 2026 (%)": s.favorabilidade2026 === undefined ? "" : s.favorabilidade2026,
     };
   });
   const baseWs = XLSX.utils.json_to_sheet(baseRows);
-  baseWs["!cols"] = [{ wch: 9 }, { wch: 28 }, { wch: 16 }, { wch: 32 }, { wch: 34 }, { wch: 18 }, { wch: 34 }, { wch: 34 }, { wch: 18 }, { wch: 34 }, { wch: 16 }, { wch: 26 }, { wch: 30 }, { wch: 32 }, { wch: 12 }, { wch: 12 }, { wch: 18 }, { wch: 22 }, { wch: 22 }];
+  baseWs["!cols"] = [{ wch: 9 }, { wch: 28 }, { wch: 16 }, { wch: 32 }, { wch: 34 }, { wch: 18 }, { wch: 34 }, { wch: 34 }, { wch: 18 }, { wch: 34 }, { wch: 16 }, { wch: 26 }, { wch: 30 }, { wch: 32 }, { wch: 20 }, { wch: 20 }, { wch: 18 }, { wch: 22 }];
   XLSX.utils.book_append_sheet(wbNew, baseWs, "Base de dados");
 
   const hierRows = hierarquia.map((h) => ({ "Nível da posição": h.nivel, "Nível elegível": h.elegivel }));
@@ -85,13 +84,13 @@ export function buildWorkbook(chairs: Chair[], people: Person[], hierarquia: { n
   XLSX.utils.book_append_sheet(wbNew, hierWs, "Hierarquia");
 
   const refWs = XLSX.utils.aoa_to_sheet([
-    ["Nine Box 2024 / Nine Box 2025 — códigos aceitos"], ...NB_CODES.map((x) => [x]), [""],
+    ["Nine Box 2025 / Nine Box 2026 — quadrantes aceitos"], ...NB_REF_LINES.map((x) => [x]), [""],
     ["Horizonte da prioridade 1 / 2"], ...INT_LABELS.map((x) => [x]), [""],
     ["Mobilidade"], ...MOB_LABELS.map((x) => [x]), [""],
     ["Conversa sobre desenvolvimento"], ...Object.values(CONV_LABELS).map((x) => [x]), [""],
     ["Continuidade da posição atual"], ...Object.values(CONT_LABELS).map((x) => [x]), [""],
     ["Lidera equipe (Sim/Não)"], ["Sim"], ["Não"], [""],
-    ["Favorabilidade do time 2025 / 2026 (%) — faixas de pontuação"],
+    ["Favorabilidade do time 2026 (%) — faixas de pontuação (ciclo único, sem ponderação)"],
     ...CRITERIA.favorabilidade.scale.map((x) => [x.label + " → " + x.points + " pts"]),
     ["Em branco = não avaliado (corte GPTW suprimido). Não estimar valor."], [""],
     ["Cargos das cadeiras (copiar para Prioridade de interesse 1 ou 2)"], ...chairs.map((c) => [c.cargo]),
@@ -234,8 +233,10 @@ export async function parseUploadedWorkbook(file: File, chairsIn: Chair[], peopl
       const mobTxt = cell(row, "Mobilidade").trim().toLowerCase();
       const convTxt = cell(row, "Conversa sobre desenvolvimento").trim().toLowerCase();
       const contTxt = cell(row, "Continuidade da posição atual").trim().toLowerCase();
-      const nb24 = cell(row, "Nine Box 2024").trim().toUpperCase();
-      const nb25 = cell(row, "Nine Box 2025").trim().toUpperCase();
+      const nb25Raw = cell(row, "Nine Box 2025");
+      const nb26Raw = cell(row, "Nine Box 2026");
+      const r25 = nbResolve(nb25Raw);
+      const r26 = nbResolve(nb26Raw);
       const record: SuccessionRecord = {
         prioridade1: cell(row, "Prioridade de interesse 1") || "",
         horizonte1: (INT_LABEL_TO_KEY[hz1] as SuccessionRecord["horizonte1"]) || "",
@@ -247,10 +248,9 @@ export async function parseUploadedWorkbook(file: File, chairsIn: Chair[], peopl
         conversaDesenvolvimento: (CONV_LABEL_TO_KEY[convTxt] as SuccessionRecord["conversaDesenvolvimento"]) || "",
         continuidade: (CONT_LABEL_TO_KEY[contTxt] as SuccessionRecord["continuidade"]) || "",
         possivelSucessorTexto: cell(row, "Possível sucessor da posição atual") || "",
-        nineBox2024: (NB_MAP[nb24] ? nb24 : "") as SuccessionRecord["nineBox2024"],
-        nineBox2025: (NB_MAP[nb25] ? nb25 : "") as SuccessionRecord["nineBox2025"],
+        nineBox2025: r25 ? r25.code : "",
+        nineBox2026: r26 ? r26.code : "",
         lideraEquipe: /^s/i.test(cell(row, "Lidera equipe (Sim/Não)", "Lidera equipe").trim()),
-        favorabilidade2025: cell(row, "Favorabilidade do time 2025 (%)", "Favorabilidade do time 2025") || "",
         favorabilidade2026: cell(row, "Favorabilidade do time 2026 (%)", "Favorabilidade do time 2026") || "",
       };
       succession[person.id] = record;

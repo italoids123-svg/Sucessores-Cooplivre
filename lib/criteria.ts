@@ -1,6 +1,7 @@
 export interface NineBoxScaleItem {
   code: string;
   label: string;
+  sub: string;
   points: number;
 }
 export interface FavorabilidadeScaleItem {
@@ -17,28 +18,27 @@ export interface KeyedScaleItem {
 export const CRITERIA = {
   nineBox: {
     weight: 40,
-    label: "Nine Box (média ponderada 2024–2025)",
-    weight2024: 0.375,
-    weight2025: 0.625,
+    label: "Nine Box (média ponderada 2025–2026)",
+    weight2025: 0.375,
+    weight2026: 0.625,
     scale: [
-      { code: "A1", label: "Estrela", points: 40 },
-      { code: "B1", label: "Futura Estrela", points: 35 },
-      { code: "C1", label: "Diamante Bruto", points: 30 },
-      { code: "A2", label: "Colaborador de Alto Impacto", points: 25 },
-      { code: "B2", label: "Colaborador Chave", points: 20 },
-      { code: "C2", label: "Dilema", points: 15 },
-      { code: "A3", label: "Colaborador Especialista", points: 10 },
-      { code: "B3", label: "Colaborador Efetivo", points: 5 },
-      { code: "C3", label: "Baixo Desempenho", points: 0 },
-      { code: "N/A", label: "Não avaliado", points: 0 },
+      { code: "Estrela", label: "Estrela", sub: "Resultado alto · Comportamento alto", points: 40 },
+      { code: "Alto Desempenho", label: "Alto Desempenho", sub: "Resultado médio · Comportamento alto", points: 35 },
+      { code: "Empregado Comprometido", label: "Empregado Comprometido", sub: "Resultado baixo · Comportamento alto", points: 30 },
+      { code: "Alto Potencial", label: "Alto Potencial", sub: "Resultado alto · Comportamento médio", points: 25 },
+      { code: "Empregado Sólido / Responsável", label: "Empregado Sólido / Responsável", sub: "Resultado médio · Comportamento médio", points: 20 },
+      { code: "Bom Executor / Especialista", label: "Bom Executor / Especialista", sub: "Resultado baixo · Comportamento médio", points: 15 },
+      { code: "Enigma / Questionável", label: "Enigma / Questionável", sub: "Resultado alto · Comportamento baixo", points: 10 },
+      { code: "Empregado Eficaz", label: "Empregado Eficaz", sub: "Resultado médio · Comportamento baixo", points: 5 },
+      { code: "Risco / Baixo Desempenho", label: "Risco / Baixo Desempenho", sub: "Resultado baixo · Comportamento baixo", points: 0 },
+      { code: "Não avaliado", label: "Não avaliado", sub: "Sem avaliação no ciclo", points: 0 },
     ] as NineBoxScaleItem[],
   },
   matchLider: { weight: 20, label: "Match Indicação Líder" },
   favorabilidade: {
     weight: 10,
     label: "Favorabilidade do time",
-    weight2025: 0.375,
-    weight2026: 0.625,
+    ciclo: 2026,
     scale: [
       { min: 85, label: "85 ou mais", points: 10 },
       { min: 76, label: "76 a 84", points: 7 },

@@ -1,9 +1,27 @@
 import { CRITERIA } from "./criteria";
 import type { Chair, ChairScore, HierarquiaEntry, Person, SuccessionMap, SuccessionRecord } from "./types";
 
-export const NB_MAP = Object.fromEntries(CRITERIA.nineBox.scale.map((x) => [x.code, x]));
 export const INT_MAP = Object.fromEntries(CRITERIA.interesse.scale.map((x) => [x.key, x]));
 export const MOB_MAP = Object.fromEntries(CRITERIA.mobilidade.scale.map((x) => [x.key, x]));
+
+// Casamento tolerante a variações de grafia dos quadrantes da matriz 9Box
+// (a base de origem escreve o mesmo quadrante de formas diferentes, ex.:
+// "Empregado sólido/ Responsável" e "Empregado Sólido / Responsável").
+export function nbKey(s?: string | null): string {
+  return (s || "")
+    .toString()
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^a-z0-9]+/g, " ")
+    .trim();
+}
+const NB_BY_KEY = Object.fromEntries(CRITERIA.nineBox.scale.map((x) => [nbKey(x.code), x]));
+export function nbResolve(v?: string | null) {
+  const k = nbKey(v);
+  if (!k || k === "-") return null; // "-" e vazio = não avaliado
+  return NB_BY_KEY[k] || null;
+}
 
 export function normCargo(s?: string | null): string {
   return (s || "")
@@ -28,7 +46,7 @@ export function buildHierMap(hierarquia: HierarquiaEntry[]): Record<string, stri
   return Object.fromEntries(hierarquia.map((h) => [h.nivel, h.elegivel]));
 }
 
-// Favorabilidade do time: fonte é o time que a pessoa LIDERA (corte de gestão imediata, GPTW), ciclos 2025/2026.
+// Favorabilidade do time: fonte é o time que a pessoa LIDERA (corte de gestão imediata, GPTW), ciclo único 2026.
 function lookupFavorabilidade(value: unknown): number | null {
   const v = Number(value);
   if (value === "" || value === null || value === undefined || isNaN(v)) return null;
@@ -38,23 +56,20 @@ function lookupFavorabilidade(value: unknown): number | null {
   return 1;
 }
 function scoreNineBox(s: SuccessionRecord): number {
-  const p24 = s.nineBox2024 && NB_MAP[s.nineBox2024] ? NB_MAP[s.nineBox2024].points : null;
-  const p25 = s.nineBox2025 && NB_MAP[s.nineBox2025] ? NB_MAP[s.nineBox2025].points : null;
-  if (p24 !== null && p25 !== null) return p24 * CRITERIA.nineBox.weight2024 + p25 * CRITERIA.nineBox.weight2025;
+  const r25 = nbResolve(s.nineBox2025);
+  const r26 = nbResolve(s.nineBox2026);
+  const p25 = r25 ? r25.points : null;
+  const p26 = r26 ? r26.points : null;
+  if (p25 !== null && p26 !== null) return p25 * CRITERIA.nineBox.weight2025 + p26 * CRITERIA.nineBox.weight2026;
+  if (p26 !== null) return p26; // só um ciclo preenchido: vale 100%
   if (p25 !== null) return p25;
-  if (p24 !== null) return p24;
   return 0;
 }
 // Retorna null quando o critério NÃO SE APLICA (não lidera equipe, ou lidera mas o GPTW suprimiu o corte).
 // null é diferente de 0: quem não se aplica disputa em 90 pontos aplicáveis, não leva nota zero.
 function scoreFavorabilidade(s: SuccessionRecord): number | null {
-  if (!s.lideraEquipe) return null;
-  const p25 = lookupFavorabilidade(s.favorabilidade2025);
-  const p26 = lookupFavorabilidade(s.favorabilidade2026);
-  if (p25 !== null && p26 !== null) return p25 * CRITERIA.favorabilidade.weight2025 + p26 * CRITERIA.favorabilidade.weight2026;
-  if (p26 !== null) return p26;
-  if (p25 !== null) return p25;
-  return null; // lidera equipe mas sem favorabilidade coletada
+  if (!s.lideraEquipe) return null; // não lidera: critério não se aplica
+  return lookupFavorabilidade(s.favorabilidade2026); // null quando lidera mas o corte foi suprimido
 }
 function scoreMobilidade(s: SuccessionRecord): number {
   return s.mobilidade && MOB_MAP[s.mobilidade] ? MOB_MAP[s.mobilidade].points : 0;
@@ -148,16 +163,16 @@ export function outrosInteressadosFor(hierMap: Record<string, string>, successio
   return people.filter((p) => !feederIds.has(p.id) && interestMatch(succession, p, targetCargo) > 0);
 }
 export function nineBoxSubLabel(s: SuccessionRecord): string {
-  if (s.nineBox2025 && NB_MAP[s.nineBox2025]) return s.nineBox2025 + " · " + NB_MAP[s.nineBox2025].label + " (2025)";
-  if (s.nineBox2024 && NB_MAP[s.nineBox2024]) return s.nineBox2024 + " · " + NB_MAP[s.nineBox2024].label + " (2024)";
+  const r26 = nbResolve(s.nineBox2026);
+  if (r26) return r26.label + " (2026)";
+  const r25 = nbResolve(s.nineBox2025);
+  if (r25) return r25.label + " (2025)";
   return "Não avaliado";
 }
 export function favSubLabel(s: SuccessionRecord, sc: ChairScore): string {
   if (!sc.favAplica) return s.lideraEquipe ? "Corte GPTW suprimido" : "Não lidera equipe";
-  const parts: string[] = [];
-  if (s.favorabilidade2025 !== "" && s.favorabilidade2025 != null) parts.push("2025: " + s.favorabilidade2025 + "%");
-  if (s.favorabilidade2026 !== "" && s.favorabilidade2026 != null) parts.push("2026: " + s.favorabilidade2026 + "%");
-  return parts.join(" · ") || "GPTW gestão imediata";
+  if (s.favorabilidade2026 !== "" && s.favorabilidade2026 != null) return "GPTW 2026: " + s.favorabilidade2026 + "%";
+  return "GPTW gestão imediata";
 }
 export function occupantLabel(chair: Chair): string | null {
   if (chair.vago) return null;
