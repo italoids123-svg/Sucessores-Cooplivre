@@ -17,7 +17,8 @@ const PAGE_META: Record<PageKey, { title: string; desc: string; searchPlaceholde
   executive: {
     title: "Gerência Executiva",
     desc: "Um nível abaixo da Diretoria na régua de elegibilidade.",
-    searchPlaceholder: "Buscar por nome ou cargo…",
+    searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
+    showDiretoriaFilter: true,
   },
   management: {
     title: "Gerência",
