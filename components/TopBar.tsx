@@ -29,7 +29,7 @@ export default function TopBar() {
     <header className="top">
       <div className="brand">
         <b>Cooplivre</b>
-        <span>Mapa Sucessório · Ciclo 2027–2030</span>
+        <span>Mapa Sucessório</span>
       </div>
       <div className="top-actions">
         <button className="action" title="Alternar tela cheia" onClick={toggleFullscreen}>

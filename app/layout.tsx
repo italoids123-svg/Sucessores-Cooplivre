@@ -11,7 +11,7 @@ const sourceSans = Source_Sans_3({
 
 export const metadata: Metadata = {
   title: "Mapa Sucessório | Cooplivre",
-  description: "Mapa Sucessório · Ciclo 2027–2030 — Cooplivre",
+  description: "Mapa Sucessório — Cooplivre",
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
