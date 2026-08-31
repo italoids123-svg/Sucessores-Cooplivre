@@ -40,6 +40,14 @@ export const CHAIRS: Chair[] = [
   { id: "c037", nome: "Gabriella Fernanda Nichols", cargo: "Coordenador de Governança Corporativa", nivel: "Coordenação", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false },
   { id: "c038", nome: "Larisse de Paula", cargo: "Coordenador de Recuperação de Crédito", nivel: "Coordenação", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false },
   { id: "c039", nome: "Renato Alves da Silva", cargo: "Coordenador de Suprimentos", nivel: "Coordenação", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false },
+  { id: "c040", nome: "Tais Regina Torres", cargo: "Especialista de Performance Corporativa", nivel: "Especialista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: 4.6, prefixLocalidade: false },
+  { id: "c041", nome: "Anderson Vasconcelos Gava", cargo: "Especialista de Produtos e Serviços", nivel: "Especialista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: 16.0, prefixLocalidade: false },
+  { id: "c042", nome: "Gabriel Henrique dos Santos Nogueira", cargo: "Especialista de Produtos e Serviços", nivel: "Especialista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: 7.3, prefixLocalidade: false },
+  { id: "c043", nome: "Leticia Batista Alexandre", cargo: "Especialista de Produtos e Serviços", nivel: "Especialista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: 5.4, prefixLocalidade: false },
+  { id: "c044", nome: "Suelen Karen de Camargo Marcolino", cargo: "Especialista de Produtos e Serviços", nivel: "Especialista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: 7.5, prefixLocalidade: false },
+  { id: "c045", nome: "Fernanda Aparecida Ravanelli Pagotto", cargo: "Especialista em Supervisão e Monitoramento", nivel: "Especialista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: 10.7, prefixLocalidade: false },
+  { id: "c046", nome: "Jose Roberto de Araujo", cargo: "Especialista em Supervisão e Monitoramento", nivel: "Especialista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: 8.1, prefixLocalidade: false },
+  { id: "c047", nome: "Mayara Miori Degaspare", cargo: "Especialista Operacional de Agronegócios", nivel: "Especialista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: 2.6, prefixLocalidade: false },
 ];
 
 export const PEOPLE: Person[] = [
@@ -81,6 +89,14 @@ export const PEOPLE: Person[] = [
   { id: "P037", nome: "Gabriella Fernanda Nichols", nivel: "Coordenação", cargo: "Coordenador de Governança Corporativa", diretoria: "Administrativa", chairId: "c037" },
   { id: "P038", nome: "Larisse de Paula", nivel: "Coordenação", cargo: "Coordenador de Recuperação de Crédito", diretoria: "Financeira", chairId: "c038" },
   { id: "P039", nome: "Renato Alves da Silva", nivel: "Coordenação", cargo: "Coordenador de Suprimentos", diretoria: "Administrativa", chairId: "c039" },
+  { id: "P040", nome: "Tais Regina Torres", nivel: "Especialista", cargo: "Especialista de Performance Corporativa", diretoria: "Negócios", chairId: "c040" },
+  { id: "P041", nome: "Anderson Vasconcelos Gava", nivel: "Especialista", cargo: "Especialista de Produtos e Serviços", diretoria: "Negócios", chairId: "c041" },
+  { id: "P042", nome: "Gabriel Henrique dos Santos Nogueira", nivel: "Especialista", cargo: "Especialista de Produtos e Serviços", diretoria: "Negócios", chairId: "c042" },
+  { id: "P043", nome: "Leticia Batista Alexandre", nivel: "Especialista", cargo: "Especialista de Produtos e Serviços", diretoria: "Negócios", chairId: "c043" },
+  { id: "P044", nome: "Suelen Karen de Camargo Marcolino", nivel: "Especialista", cargo: "Especialista de Produtos e Serviços", diretoria: "Negócios", chairId: "c044" },
+  { id: "P045", nome: "Fernanda Aparecida Ravanelli Pagotto", nivel: "Especialista", cargo: "Especialista em Supervisão e Monitoramento", diretoria: "Administrativa", chairId: "c045" },
+  { id: "P046", nome: "Jose Roberto de Araujo", nivel: "Especialista", cargo: "Especialista em Supervisão e Monitoramento", diretoria: "Administrativa", chairId: "c046" },
+  { id: "P047", nome: "Mayara Miori Degaspare", nivel: "Especialista", cargo: "Especialista Operacional de Agronegócios", diretoria: "Negócios", chairId: "c047" },
 ];
 
 export const HIERARQUIA: HierarquiaEntry[] = [
