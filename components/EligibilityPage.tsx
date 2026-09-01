@@ -11,7 +11,7 @@ import {
   successorsFor,
 } from "@/lib/scoring";
 
-const NIVEIS = ["C-Level", "Diretoria", "Gerência Executiva", "Gerência", "Coordenação", "Especialista"];
+const NIVEIS = ["C-Level", "Diretoria", "Gerência Executiva", "Gerência", "Coordenação"];
 
 export default function EligibilityPage() {
   const { chairs, people, hierarquia, hierMap, succession, activePage, showNominal, setShowNominal } = useApp();

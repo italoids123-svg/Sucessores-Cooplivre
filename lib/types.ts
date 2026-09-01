@@ -1,4 +1,4 @@
-export type Nivel = "C-Level" | "Diretoria" | "Gerência Executiva" | "Gerência" | "Coordenação" | "Especialista";
+export type Nivel = "C-Level" | "Diretoria" | "Gerência Executiva" | "Gerência" | "Coordenação";
 
 export type PageKey = "directors" | "executive" | "management" | "coordenacao";
 export type NavPage = PageKey | "eligibility" | "criteria" | "questionnaire";
