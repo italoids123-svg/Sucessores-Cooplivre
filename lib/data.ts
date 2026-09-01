@@ -110,5 +110,5 @@ export const LEVEL_GROUPS: Record<PageKey, string[]> = {
   directors: ["C-Level", "Diretoria"],
   executive: ["Gerência Executiva"],
   management: ["Gerência"],
-  coordenacao: ["Coordenação", "Especialista"],
+  coordenacao: ["Coordenação"],
 };

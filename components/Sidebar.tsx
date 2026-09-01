@@ -7,7 +7,7 @@ const MAP_ITEMS: { key: NavPage; label: string }[] = [
   { key: "directors", label: "Diretoria" },
   { key: "executive", label: "Gerência Executiva" },
   { key: "management", label: "Gerência" },
-  { key: "coordenacao", label: "Coordenação e Especialistas" },
+  { key: "coordenacao", label: "Coordenação" },
 ];
 
 const METHOD_ITEMS: { key: NavPage; label: string }[] = [

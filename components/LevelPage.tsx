@@ -27,8 +27,8 @@ const PAGE_META: Record<PageKey, { title: string; desc: string; searchPlaceholde
     showDiretoriaFilter: true,
   },
   coordenacao: {
-    title: "Coordenação e Especialistas",
-    desc: "Posições de coordenação e especialistas — um nível abaixo da Gerência na régua de elegibilidade.",
+    title: "Coordenação",
+    desc: "Posições de coordenação — pool de elegibilidade para a Gerência.",
     searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
     showDiretoriaFilter: true,
   },
