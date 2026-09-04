@@ -2,6 +2,7 @@
 
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import { CHAIRS as INITIAL_CHAIRS, HIERARQUIA, PEOPLE as INITIAL_PEOPLE } from "./data";
+import { clearPersistedState, loadPersistedState, savePersistedState } from "./persistence";
 import { buildHierMap } from "./scoring";
 import type { Chair, NavPage, Person, SuccessionMap } from "./types";
 import { downloadWorkbook, parseUploadedWorkbook } from "./workbook";
@@ -31,6 +32,7 @@ interface AppContextValue {
 
   downloadBase: () => void;
   uploadBase: (file: File) => Promise<void>;
+  resetBase: () => void;
 }
 
 const AppContext = createContext<AppContextValue | null>(null);
@@ -46,15 +48,42 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [modalChairId, setModalChairId] = useState<string | null>(null);
   const [showNominal, setShowNominal] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
+  const [hydrated, setHydrated] = useState(false);
 
   const hierMap = useMemo(() => buildHierMap(HIERARQUIA), []);
 
   useEffect(() => {
-    // Lê o relógio do cliente uma única vez após montar, para evitar
-    // divergência de hidratação entre o timestamp do servidor e do navegador.
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    setBaseUpdatedAt(new Date());
+    // Recupera a última base salva neste navegador (localStorage) — evita
+    // perder o que foi carregado ao simplesmente recarregar a página.
+    // Roda uma única vez, após montar, para não divergir da renderização
+    // inicial do servidor (que não tem acesso a localStorage).
+    const stored = loadPersistedState();
+    if (stored) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect -- hidrata a partir do localStorage, só roda uma vez ao montar
+      setChairs(stored.chairs);
+      setPeople(stored.people);
+      setSuccession(stored.succession);
+      setDataVersion(stored.dataVersion);
+      setBaseUpdatedAt(stored.baseUpdatedAt ? new Date(stored.baseUpdatedAt) : new Date());
+    } else {
+      setBaseUpdatedAt(new Date());
+    }
+    setHydrated(true);
   }, []);
+
+  useEffect(() => {
+    // Só passa a salvar depois que a hidratação acima terminou, senão o
+    // estado inicial (vazio) sobrescreveria uma base já salva antes dela
+    // ser lida.
+    if (!hydrated) return;
+    savePersistedState({
+      chairs,
+      people,
+      succession,
+      dataVersion,
+      baseUpdatedAt: baseUpdatedAt ? baseUpdatedAt.toISOString() : null,
+    });
+  }, [hydrated, chairs, people, succession, dataVersion, baseUpdatedAt]);
 
   const openModal = useCallback((chairId: string) => setModalChairId(chairId), []);
   const closeModal = useCallback(() => setModalChairId(null), []);
@@ -81,10 +110,20 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       setSuccession(result.succession);
       setDataVersion((v) => v + 1);
       setBaseUpdatedAt(new Date());
-      showNotice(result.noticeHtml);
+      showNotice(result.noticeHtml + " Fica salvo neste navegador — ao voltar aqui depois, os dados continuam.");
     },
     [chairs, people, succession, showNotice]
   );
+
+  const resetBase = useCallback(() => {
+    clearPersistedState();
+    setChairs(INITIAL_CHAIRS);
+    setPeople(INITIAL_PEOPLE);
+    setSuccession({});
+    setDataVersion((v) => v + 1);
+    setBaseUpdatedAt(new Date());
+    showNotice("Base salva neste navegador foi apagada — voltou ao ponto de partida (sem dados de sucessão).");
+  }, [showNotice]);
 
   const value: AppContextValue = {
     chairs,
@@ -106,6 +145,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     closeNotice,
     downloadBase,
     uploadBase,
+    resetBase,
   };
 
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>;

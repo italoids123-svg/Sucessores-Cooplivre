@@ -4,7 +4,7 @@ import { useApp } from "@/lib/context";
 import type { ChangeEvent } from "react";
 
 export default function TopBar() {
-  const { downloadBase, uploadBase } = useApp();
+  const { downloadBase, uploadBase, resetBase } = useApp();
 
   function toggleFullscreen() {
     if (!document.fullscreenElement) {
@@ -16,6 +16,12 @@ export default function TopBar() {
 
   function handlePrint() {
     window.print();
+  }
+
+  function handleReset() {
+    if (window.confirm("Isso apaga a base salva neste navegador e volta ao ponto de partida (sem sucessores preenchidos). Baixe a base atual antes, se quiser manter uma cópia. Continuar?")) {
+      resetBase();
+    }
   }
 
   async function handleFileChange(ev: ChangeEvent<HTMLInputElement>) {
@@ -38,11 +44,11 @@ export default function TopBar() {
           </svg>
           Tela cheia
         </button>
-        <button className="action" title="Salvar/imprimir" onClick={handlePrint}>
+        <button className="action" title="Imprimir ou salvar como PDF a visão atual do dashboard" onClick={handlePrint}>
           <svg viewBox="0 0 24 24">
             <path d="M6 9V3h12v6M6 18H4a1 1 0 0 1-1-1v-5a1 1 0 0 1 1-1h16a1 1 0 0 1 1 1v5a1 1 0 0 1-1 1h-2M6 14h12v7H6z"></path>
           </svg>
-          Salvar dashboard
+          Imprimir / Salvar PDF
         </button>
         <button className="action" title="Baixar base para atualização" onClick={downloadBase}>
           <svg viewBox="0 0 24 24">
@@ -57,6 +63,12 @@ export default function TopBar() {
           Carregar base preenchida
           <input type="file" accept=".xlsx,.xls" onChange={handleFileChange} />
         </label>
+        <button className="action" title="Apagar a base salva neste navegador e voltar ao ponto de partida" onClick={handleReset}>
+          <svg viewBox="0 0 24 24">
+            <path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2m3 0-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"></path>
+          </svg>
+          Limpar dados salvos
+        </button>
       </div>
     </header>
   );
