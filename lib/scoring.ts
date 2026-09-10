@@ -142,25 +142,34 @@ export function feederPoolFor(hierMap: Record<string, string>, people: Person[],
   if (!feederLevel) return [];
   return people.filter((p) => p.nivel === feederLevel && p.diretoria === chair.diretoria);
 }
+// Ordena por aderência (score total para a cadeira), da maior para a menor.
+function sortByScoreDesc(succession: SuccessionMap, people: Person[], chair: Chair, candidates: Person[]): Person[] {
+  return [...candidates].sort(
+    (a, b) => scoreForChair(succession, people, b.id, chair).total - scoreForChair(succession, people, a.id, chair).total
+  );
+}
 // Sucessores mapeados: elegível (nível+diretoria) + interesse declarado (1ª ou 2ª) + score >= limiar
 export function successorsFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chair: Chair): Person[] {
-  return feederPoolFor(hierMap, people, chair).filter((p) => {
+  const list = feederPoolFor(hierMap, people, chair).filter((p) => {
     const sc = scoreForChair(succession, people, p.id, chair);
     return sc.which > 0 && sc.total >= CRITERIA.eligibilityThreshold;
   });
+  return sortByScoreDesc(succession, people, chair, list);
 }
 // Ainda não mapeados: elegível + interesse declarado, mas score abaixo do limiar (em desenvolvimento)
 export function aindaNaoMapeadosFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chair: Chair): Person[] {
-  return feederPoolFor(hierMap, people, chair).filter((p) => {
+  const list = feederPoolFor(hierMap, people, chair).filter((p) => {
     const sc = scoreForChair(succession, people, p.id, chair);
     return sc.which > 0 && sc.total < CRITERIA.eligibilityThreshold;
   });
+  return sortByScoreDesc(succession, people, chair, list);
 }
 // Outros interessados: declararam interesse nessa posição mas não estão no nível/diretoria elegível
 export function outrosInteressadosFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chair: Chair): Person[] {
   const targetCargo = normCargo(chair.cargo);
   const feederIds = new Set(feederPoolFor(hierMap, people, chair).map((p) => p.id));
-  return people.filter((p) => !feederIds.has(p.id) && interestMatch(succession, p, targetCargo) > 0);
+  const list = people.filter((p) => !feederIds.has(p.id) && interestMatch(succession, p, targetCargo) > 0);
+  return sortByScoreDesc(succession, people, chair, list);
 }
 export function nineBoxSubLabel(s: SuccessionRecord): string {
   const r26 = nbResolve(s.nineBox2026);

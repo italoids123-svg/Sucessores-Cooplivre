@@ -8,6 +8,7 @@ const MAP_ITEMS: { key: NavPage; label: string }[] = [
   { key: "executive", label: "Gerência Executiva" },
   { key: "management", label: "Gerência" },
   { key: "coordenacao", label: "Coordenação" },
+  { key: "analista", label: "Analista" },
 ];
 
 const METHOD_ITEMS: { key: NavPage; label: string }[] = [

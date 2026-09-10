@@ -32,6 +32,12 @@ const PAGE_META: Record<PageKey, { title: string; desc: string; searchPlaceholde
     searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
     showDiretoriaFilter: true,
   },
+  analista: {
+    title: "Analista",
+    desc: "Posições de analista — pool de elegibilidade para a Coordenação.",
+    searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
+    showDiretoriaFilter: true,
+  },
 };
 
 export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
