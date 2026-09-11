@@ -32,24 +32,61 @@ const PAGE_META: Record<PageKey, { title: string; desc: string; searchPlaceholde
     searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
     showDiretoriaFilter: true,
   },
-  analista: {
-    title: "Analista",
-    desc: "Posições de analista — pool de elegibilidade para a Coordenação.",
-    searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
-    showDiretoriaFilter: true,
-  },
   especialista: {
     title: "Especialista",
     desc: "Posições de especialista — trilha técnica, sem régua de elegibilidade hierárquica definida.",
     searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
     showDiretoriaFilter: true,
   },
+  analista: {
+    title: "Analista",
+    desc: "Posições de analista — pool de elegibilidade para a Coordenação.",
+    searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
+    showDiretoriaFilter: true,
+  },
+};
+
+// Grupo de gerência inferido a partir do cargo — não existe campo dedicado nos
+// dados, então classifica por padrão textual (mesma convenção usada nas
+// planilhas de RH: "Gerente de P.A." = agência, "Gerente de Relacionamento" =
+// carteira de clientes, o restante é gerência administrativa/UAD).
+type GerenciaGrupo = "UAD" | "PA" | "Relacionamento";
+
+function gerenciaGrupoOf(cargo: string): GerenciaGrupo {
+  if (cargo.includes("P.A.")) return "PA";
+  if (cargo.includes("Relacionamento")) return "Relacionamento";
+  return "UAD";
+}
+
+const GERENCIA_GRUPO_LABEL: Record<GerenciaGrupo, string> = {
+  UAD: "Gerentes UAD",
+  PA: "Gerentes PA",
+  Relacionamento: "Gerentes de Relacionamento",
+};
+
+// Senioridade inferida do sufixo do cargo (Jr/Pl/Sr), como já vem nas
+// planilhas de RH para as posições de analista.
+type Senioridade = "JR" | "PL" | "SR";
+
+function senioridadeOf(cargo: string): Senioridade | null {
+  if (/\bjr\.?$/i.test(cargo.trim())) return "JR";
+  if (/\bpl\.?$/i.test(cargo.trim())) return "PL";
+  if (/\bsr\.?$/i.test(cargo.trim())) return "SR";
+  return null;
+}
+
+const SENIORIDADE_LABEL: Record<Senioridade, string> = {
+  JR: "Júnior",
+  PL: "Pleno",
+  SR: "Sênior",
 };
 
 export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
   const { chairs, people, hierMap, succession, activePage, baseUpdatedAt } = useApp();
   const [search, setSearch] = useState("");
   const [diretoriaFilter, setDiretoriaFilter] = useState("");
+  const [grupoFilter, setGrupoFilter] = useState<GerenciaGrupo | "">("");
+  const [senioridadeFilter, setSenioridadeFilter] = useState<Senioridade | "">("");
 
   const meta = PAGE_META[pageKey];
   const pageLevels = LEVEL_GROUPS[pageKey];
@@ -63,12 +100,14 @@ export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
 
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
-    return chairsInLevel.filter(
-      (c) =>
-        (!diretoriaFilter || c.diretoria === diretoriaFilter) &&
-        (!q || c.nome.toLowerCase().includes(q) || c.cargo.toLowerCase().includes(q))
-    );
-  }, [chairsInLevel, diretoriaFilter, search]);
+    return chairsInLevel.filter((c) => {
+      if (diretoriaFilter && c.diretoria !== diretoriaFilter) return false;
+      if (pageKey === "management" && grupoFilter && gerenciaGrupoOf(c.cargo) !== grupoFilter) return false;
+      if (pageKey === "analista" && senioridadeFilter && senioridadeOf(c.cargo) !== senioridadeFilter) return false;
+      if (q && !c.nome.toLowerCase().includes(q) && !c.cargo.toLowerCase().includes(q)) return false;
+      return true;
+    });
+  }, [chairsInLevel, diretoriaFilter, search, pageKey, grupoFilter, senioridadeFilter]);
 
   const { pct2, pct1, pct0, bucket2, bucket1, bucket0 } = useMemo(() => {
     let b2 = 0,
@@ -113,7 +152,7 @@ export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
       <div className="kpis">
         <div className="kpi">
           <div className="kpi-label">Posições</div>
-          <div className="kpi-value">{chairsInLevel.length}</div>
+          <div className="kpi-value">{filtered.length}</div>
           <div className="kpi-sub">posições exibidas</div>
         </div>
         <div className="kpi coverage-kpi">
@@ -172,6 +211,26 @@ export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
             {diretorias.map((d) => (
               <option key={d} value={d}>
                 {d}
+              </option>
+            ))}
+          </select>
+        ) : null}
+        {pageKey === "management" ? (
+          <select value={grupoFilter} onChange={(ev) => setGrupoFilter(ev.target.value as GerenciaGrupo | "")}>
+            <option value="">Todos os grupos</option>
+            {(Object.keys(GERENCIA_GRUPO_LABEL) as GerenciaGrupo[]).map((g) => (
+              <option key={g} value={g}>
+                {GERENCIA_GRUPO_LABEL[g]}
+              </option>
+            ))}
+          </select>
+        ) : null}
+        {pageKey === "analista" ? (
+          <select value={senioridadeFilter} onChange={(ev) => setSenioridadeFilter(ev.target.value as Senioridade | "")}>
+            <option value="">Todas as senioridades</option>
+            {(Object.keys(SENIORIDADE_LABEL) as Senioridade[]).map((s) => (
+              <option key={s} value={s}>
+                {SENIORIDADE_LABEL[s]}
               </option>
             ))}
           </select>
