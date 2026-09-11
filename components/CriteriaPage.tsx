@@ -127,10 +127,12 @@ export default function CriteriaPage() {
             Amplitude geográfica que o candidato aceita para o desafio, a partir da localidade atual declarada.
             <br />
             <br />
-            <b>Também define elegibilidade geográfica:</b> além de pontuar, essa resposta filtra quem entra no pool
-            de sucessores de cada posição — só contam as pessoas cuja localidade atual está ao alcance da
-            abrangência escolhida (mesma cidade, sede administrativa, raio de 40 km ou qualquer unidade, conforme a
-            opção). Quem fica de fora só por esse motivo aparece em &quot;Outros interessados&quot; na posição.
+            <b>Também define elegibilidade geográfica:</b> além de pontuar, essa resposta filtra, para cada posição,
+            quem pode contar como sucessor e quem pode aparecer em &quot;Outros interessados&quot; — cada opção é
+            avaliada de forma independente, sem exceção automática para quem já está na cidade da posição: &quot;Local
+            atual&quot; só alcança a própria cidade, &quot;Sede&quot; só alcança Capivari (mesmo que a localidade atual
+            seja outra), &quot;Raio de 40 km&quot; usa a distância rodoviária estimada, e &quot;Qualquer unidade&quot;
+            alcança todas.
             <br />
             <br />
             <b>Normalização:</b> a soma bruta dos critérios é convertida em percentual de aproveitamento — pontos

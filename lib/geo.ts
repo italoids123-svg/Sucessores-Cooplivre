@@ -83,21 +83,25 @@ export function roadDistanceKm(cidadeA?: string | null, cidadeB?: string | null)
 }
 
 // A resposta de mobilidade do questionário de interesse define até onde a pessoa
-// aceita se mover a partir da sua localidade atual: só a própria cidade ("local
-// atual"), a sede administrativa ("sede"), um raio de 40 km, ou qualquer unidade.
+// aceita se mover a partir da sua localidade atual — cada opção é avaliada de
+// forma independente, sem exceção automática para "já estou nessa cidade":
+//   - "Local atual"  → só a própria cidade.
+//   - "Sede"         → só a sede administrativa (Capivari), mesmo que a
+//                       localidade atual da pessoa seja outra.
+//   - "Raio de 40 km"→ distância rodoviária estimada até 40 km.
+//   - "Qualquer unidade" → qualquer cidade.
 // Quando a origem/destino não é reconhecida ou a mobilidade ainda não foi
 // respondida, a checagem é permissiva (não bloqueia) — a ausência de dado geográfico
 // não deve, por si só, esconder alguém que já é elegível por nível e diretoria.
 export function mobilidadeAlcancaCidade(cidadeOrigem: string | null, cidadeDestino: string | null, mobilidade: Mobilidade | undefined): boolean {
   if (!cidadeOrigem || !cidadeDestino) return true;
-  if (normalizeCidade(cidadeOrigem) === normalizeCidade(cidadeDestino)) return true;
   if (!mobilidade) return true;
   if (mobilidade === "qualquer") return true;
+  if (mobilidade === "local") return normalizeCidade(cidadeOrigem) === normalizeCidade(cidadeDestino);
   if (mobilidade === "sede") return normalizeCidade(cidadeDestino) === normalizeCidade(SEDE_CIDADE);
   if (mobilidade === "raio40") {
     const km = roadDistanceKm(cidadeOrigem, cidadeDestino);
     return km === null ? true : km <= 40;
   }
-  if (mobilidade === "local") return false;
   return true;
 }

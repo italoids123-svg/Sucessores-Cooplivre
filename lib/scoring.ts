@@ -179,11 +179,17 @@ export function aindaNaoMapeadosFor(hierMap: Record<string, string>, succession:
   });
   return sortByScoreDesc(succession, people, chair, list);
 }
-// Outros interessados: declararam interesse nessa posição mas não estão no nível/diretoria/mobilidade elegíveis
+// Outros interessados: declararam interesse nessa posição, mas não estão no nível/diretoria elegíveis —
+// mesmo assim, só contam para ESTA cadeira se a posição estiver ao alcance da mobilidade declarada.
 export function outrosInteressadosFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
   const targetCargo = normCargo(chair.cargo);
   const feederIds = new Set(feederPoolFor(hierMap, succession, people, chairs, chair).map((p) => p.id));
-  const list = people.filter((p) => !feederIds.has(p.id) && interestMatch(succession, p, targetCargo) > 0);
+  const list = people.filter(
+    (p) =>
+      !feederIds.has(p.id) &&
+      interestMatch(succession, p, targetCargo) > 0 &&
+      mobilidadeAlcancaCidade(localidadeAtualDe(succession, chairs, p), chair.cidade, (succession[p.id] || {}).mobilidade)
+  );
   return sortByScoreDesc(succession, people, chair, list);
 }
 export function nineBoxSubLabel(s: SuccessionRecord): string {
