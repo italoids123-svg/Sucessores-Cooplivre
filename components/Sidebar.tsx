@@ -9,6 +9,7 @@ const MAP_ITEMS: { key: NavPage; label: string }[] = [
   { key: "management", label: "Gerência" },
   { key: "coordenacao", label: "Coordenação" },
   { key: "analista", label: "Analista" },
+  { key: "especialista", label: "Especialista" },
 ];
 
 const METHOD_ITEMS: { key: NavPage; label: string }[] = [

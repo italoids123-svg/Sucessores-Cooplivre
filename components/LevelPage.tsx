@@ -38,6 +38,12 @@ const PAGE_META: Record<PageKey, { title: string; desc: string; searchPlaceholde
     searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
     showDiretoriaFilter: true,
   },
+  especialista: {
+    title: "Especialista",
+    desc: "Posições de especialista — trilha técnica, sem régua de elegibilidade hierárquica definida.",
+    searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
+    showDiretoriaFilter: true,
+  },
 };
 
 export default function LevelPage({ pageKey }: { pageKey: PageKey }) {

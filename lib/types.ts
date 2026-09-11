@@ -1,6 +1,6 @@
-export type Nivel = "C-Level" | "Diretoria" | "Gerência Executiva" | "Gerência" | "Coordenação" | "Analista";
+export type Nivel = "C-Level" | "Diretoria" | "Gerência Executiva" | "Gerência" | "Coordenação" | "Analista" | "Especialista";
 
-export type PageKey = "directors" | "executive" | "management" | "coordenacao" | "analista";
+export type PageKey = "directors" | "executive" | "management" | "coordenacao" | "analista" | "especialista";
 export type NavPage = PageKey | "eligibility" | "criteria" | "questionnaire";
 
 export interface Chair {
