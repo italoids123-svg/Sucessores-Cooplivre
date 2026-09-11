@@ -1,17 +1,30 @@
 "use client";
 
 import { useEffect } from "react";
-import CandidateCard from "./CandidateCard";
+import CandidateCard, { type CandidateBucket } from "./CandidateCard";
 import { useApp } from "@/lib/context";
+import { CRITERIA } from "@/lib/criteria";
 import { aindaNaoMapeadosFor, occupantLabel, outrosInteressadosFor, successorsFor } from "@/lib/scoring";
 import type { Chair, Person } from "@/lib/types";
 
-function Section({ title, people, chairId, chair }: { title: string; people: Person[]; chairId: string; chair: Chair }) {
+function Section({
+  title,
+  people,
+  chairId,
+  chair,
+  bucket,
+}: {
+  title: string;
+  people: Person[];
+  chairId: string;
+  chair: Chair;
+  bucket: CandidateBucket;
+}) {
   return (
     <div className="modal-section">
       <h4>{title}</h4>
       {people.length ? (
-        people.map((p) => <CandidateCard key={p.id + chairId} person={p} chair={chair} />)
+        people.map((p) => <CandidateCard key={p.id + chairId} person={p} chair={chair} bucket={bucket} />)
       ) : (
         <div className="modal-empty">Nenhuma pessoa neste grupo.</div>
       )}
@@ -70,22 +83,25 @@ export default function ChairModal() {
         </div>
         <div className="modal-kpis">
           <div className="modal-kpi">
-            <div className="mk-label">Interessados dentro da pontuação de aderência</div>
+            <div className="mk-label">Dentro da pontuação de aderência</div>
             <div className="mk-value">{successors.length}</div>
+            <div className="mk-sub">Nível elegível · {CRITERIA.eligibilityThreshold} pontos ou mais</div>
           </div>
           <div className="modal-kpi">
-            <div className="mk-label">Interessados abaixo da pontuação de aderência</div>
+            <div className="mk-label">Abaixo da pontuação de aderência</div>
             <div className="mk-value">{naoMapeados.length}</div>
+            <div className="mk-sub">Nível elegível · menos de {CRITERIA.eligibilityThreshold} pontos</div>
           </div>
           <div className="modal-kpi">
-            <div className="mk-label">Interessados fora da hierarquia elegível</div>
+            <div className="mk-label">Fora da hierarquia</div>
             <div className="mk-value">{outros.length}</div>
+            <div className="mk-sub">Nível não elegível para esta posição</div>
           </div>
         </div>
         <div className="modal-sections">
-          <Section title="Interessados dentro da pontuação de aderência" people={successors} chairId={chair.id} chair={chair} />
-          <Section title="Interessados abaixo da pontuação de aderência" people={naoMapeados} chairId={chair.id} chair={chair} />
-          <Section title="Interessados fora da hierarquia elegível" people={outros} chairId={chair.id} chair={chair} />
+          <Section title="Interessados dentro da pontuação de aderência" people={successors} chairId={chair.id} chair={chair} bucket="dentro" />
+          <Section title="Interessados abaixo da pontuação de aderência" people={naoMapeados} chairId={chair.id} chair={chair} bucket="abaixo" />
+          <Section title="Interessados fora da hierarquia elegível" people={outros} chairId={chair.id} chair={chair} bucket="fora" />
         </div>
       </div>
     </div>
