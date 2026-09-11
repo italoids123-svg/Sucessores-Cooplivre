@@ -127,7 +127,7 @@ export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
   }, [chairsInLevel, hierMap, succession, people, chairs]);
 
   const { pdiPct, respondentesCount, scopeCount } = useMemo(() => {
-    const feederLevels = [...new Set(pageLevels.map((l) => hierMap[l]).filter(Boolean))];
+    const feederLevels = [...new Set(pageLevels.flatMap((l) => hierMap[l] || []))];
     const scopePeople = people.filter((p) => pageLevels.includes(p.nivel) || feederLevels.includes(p.nivel));
     const respondentes = scopePeople.filter((p) => hasAnyData(succession, p.id));
     const comPlanoAtivo = respondentes.filter((p) => (succession[p.id] || {}).conversaDesenvolvimento === "andamento");

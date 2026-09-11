@@ -92,7 +92,7 @@ export function roadDistanceKm(cidadeA?: string | null, cidadeB?: string | null)
 //   - "Qualquer unidade" → qualquer cidade.
 // Quando a origem/destino não é reconhecida ou a mobilidade ainda não foi
 // respondida, a checagem é permissiva (não bloqueia) — a ausência de dado geográfico
-// não deve, por si só, esconder alguém que já é elegível por nível e diretoria.
+// não deve, por si só, esconder alguém que já é elegível por nível.
 export function mobilidadeAlcancaCidade(cidadeOrigem: string | null, cidadeDestino: string | null, mobilidade: Mobilidade | undefined): boolean {
   if (!cidadeOrigem || !cidadeDestino) return true;
   if (!mobilidade) return true;

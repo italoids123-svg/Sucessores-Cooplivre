@@ -43,8 +43,15 @@ export function fmtNum(v: number): string {
   return Number.isInteger(v) ? String(v) : v.toFixed(1).replace(".", ",");
 }
 
-export function buildHierMap(hierarquia: HierarquiaEntry[]): Record<string, string> {
-  return Object.fromEntries(hierarquia.map((h) => [h.nivel, h.elegivel]));
+// Um nível pode ter mais de um nível elegível (ex.: Gerência recebe de Coordenação
+// e de Especialista) — por isso o mapa agrupa em lista, na ordem em que aparecem
+// na Hierarquia.
+export function buildHierMap(hierarquia: HierarquiaEntry[]): Record<string, string[]> {
+  const map: Record<string, string[]> = {};
+  hierarquia.forEach((h) => {
+    (map[h.nivel] ||= []).push(h.elegivel);
+  });
+  return map;
 }
 
 // Favorabilidade do time: fonte é o time que a pessoa LIDERA (corte de gestão imediata, GPTW), ciclo único 2026.
@@ -147,13 +154,12 @@ function localidadeAtualDe(succession: SuccessionMap, chairs: Chair[], person: P
   const chairAtual = chairs.find((c) => c.id === person.chairId);
   return chairAtual ? chairAtual.cidade : null;
 }
-export function feederPoolFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
-  const feederLevel = hierMap[chair.nivel];
-  if (!feederLevel) return [];
+export function feederPoolFor(hierMap: Record<string, string[]>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
+  const feederLevels = hierMap[chair.nivel];
+  if (!feederLevels || !feederLevels.length) return [];
   return people.filter(
     (p) =>
-      p.nivel === feederLevel &&
-      p.diretoria === chair.diretoria &&
+      feederLevels.includes(p.nivel) &&
       mobilidadeAlcancaCidade(localidadeAtualDe(succession, chairs, p), chair.cidade, (succession[p.id] || {}).mobilidade)
   );
 }
@@ -163,8 +169,8 @@ function sortByScoreDesc(succession: SuccessionMap, people: Person[], chair: Cha
     (a, b) => scoreForChair(succession, people, b.id, chair).total - scoreForChair(succession, people, a.id, chair).total
   );
 }
-// Sucessores mapeados: elegível (nível+diretoria) + interesse declarado (1ª ou 2ª) + score >= limiar
-export function successorsFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
+// Sucessores mapeados: elegível por nível + interesse declarado (1ª ou 2ª) + score >= limiar
+export function successorsFor(hierMap: Record<string, string[]>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
   const list = feederPoolFor(hierMap, succession, people, chairs, chair).filter((p) => {
     const sc = scoreForChair(succession, people, p.id, chair);
     return sc.which > 0 && sc.total >= CRITERIA.eligibilityThreshold;
@@ -172,16 +178,16 @@ export function successorsFor(hierMap: Record<string, string>, succession: Succe
   return sortByScoreDesc(succession, people, chair, list);
 }
 // Ainda não mapeados: elegível + interesse declarado, mas score abaixo do limiar (em desenvolvimento)
-export function aindaNaoMapeadosFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
+export function aindaNaoMapeadosFor(hierMap: Record<string, string[]>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
   const list = feederPoolFor(hierMap, succession, people, chairs, chair).filter((p) => {
     const sc = scoreForChair(succession, people, p.id, chair);
     return sc.which > 0 && sc.total < CRITERIA.eligibilityThreshold;
   });
   return sortByScoreDesc(succession, people, chair, list);
 }
-// Outros interessados: declararam interesse nessa posição, mas não estão no nível/diretoria elegíveis —
+// Outros interessados: declararam interesse nessa posição, mas não estão no nível elegível —
 // mesmo assim, só contam para ESTA cadeira se a posição estiver ao alcance da mobilidade declarada.
-export function outrosInteressadosFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
+export function outrosInteressadosFor(hierMap: Record<string, string[]>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
   const targetCargo = normCargo(chair.cargo);
   const feederIds = new Set(feederPoolFor(hierMap, succession, people, chairs, chair).map((p) => p.id));
   const list = people.filter(

@@ -27,6 +27,21 @@ export default function EligibilityPage() {
     );
   }, [chairs, levelFilter, search]);
 
+  // Um nível pode ter mais de um nível elegível (ex.: Gerência recebe de Coordenação
+  // e de Especialista) — agrupa as entradas da Hierarquia por nível, na ordem em que aparecem.
+  const eligibilityRows = useMemo(() => {
+    const order: string[] = [];
+    const map = new Map<string, string[]>();
+    hierarquia.forEach((h) => {
+      if (!map.has(h.nivel)) {
+        map.set(h.nivel, []);
+        order.push(h.nivel);
+      }
+      map.get(h.nivel)!.push(h.elegivel);
+    });
+    return order.map((nivel) => ({ nivel, elegiveis: map.get(nivel)! }));
+  }, [hierarquia]);
+
   const threshold = CRITERIA.eligibilityThreshold;
 
   return (
@@ -56,8 +71,8 @@ export default function EligibilityPage() {
               <div>
                 <b>Elegibilidade hierárquica e geográfica</b>
                 <p>
-                  O nível (e a diretoria) atual está relacionado à posição na aba Hierarquia, e a localidade atual da
-                  pessoa está ao alcance da posição de acordo com a mobilidade declarada.
+                  O nível atual está relacionado à posição na aba Hierarquia (a diretoria não é um critério), e a
+                  localidade atual da pessoa está ao alcance da posição de acordo com a mobilidade declarada.
                 </p>
               </div>
             </div>
@@ -113,6 +128,32 @@ export default function EligibilityPage() {
               </tr>
             </tbody>
           </table>
+        </div>
+      </div>
+
+      <div className="card" style={{ marginTop: "18px", padding: "16px 18px" }}>
+        <h3 style={{ fontSize: "13.5px" }}>Régua de elegibilidade</h3>
+        <p style={{ fontSize: "12px", color: "var(--muted)", margin: "6px 0 0" }}>
+          O pool elegível de cada cadeira é definido pela aba Hierarquia. A diretoria não é um critério — qualquer
+          diretoria pode alimentar qualquer outra.
+        </p>
+        <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "12.5px" }}>
+          {eligibilityRows.map((h) => (
+            <div
+              key={h.nivel}
+              style={{ display: "flex", justifyContent: "space-between", padding: "8px 10px", background: "var(--paper)", borderRadius: "8px" }}
+            >
+              <span>
+                <b>{h.nivel}</b>
+              </span>
+              <span style={{ color: "var(--muted)" }}>pool elegível → {h.elegiveis.join(", ")}</span>
+            </div>
+          ))}
+          <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "4px" }}>
+            Um candidato só conta como sucessor de uma cadeira se estiver no nível elegível, se a posição estiver ao
+            alcance da mobilidade declarada a partir da sua localidade atual, tiver declarado essa posição como
+            Prioridade de interesse 1 ou 2, e atingir {threshold} pontos ou mais no total.
+          </div>
         </div>
       </div>
 
@@ -205,32 +246,6 @@ export default function EligibilityPage() {
             })}
           </tbody>
         </table>
-      </div>
-
-      <div className="card" style={{ marginTop: "18px", padding: "16px 18px" }}>
-        <h3 style={{ fontSize: "13.5px" }}>Régua de elegibilidade</h3>
-        <p style={{ fontSize: "12px", color: "var(--muted)", margin: "6px 0 0" }}>
-          O pool elegível de cada cadeira é o nível imediatamente abaixo, respeitando a estrutura estatutária da
-          Cooplivre.
-        </p>
-        <div style={{ marginTop: "10px", display: "flex", flexDirection: "column", gap: "6px", fontSize: "12.5px" }}>
-          {hierarquia.map((h) => (
-            <div
-              key={h.nivel}
-              style={{ display: "flex", justifyContent: "space-between", padding: "8px 10px", background: "var(--paper)", borderRadius: "8px" }}
-            >
-              <span>
-                <b>{h.nivel}</b>
-              </span>
-              <span style={{ color: "var(--muted)" }}>pool elegível → {h.elegivel}</span>
-            </div>
-          ))}
-          <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "4px" }}>
-            Um candidato só conta como sucessor de uma cadeira se estiver no nível e na diretoria elegíveis, se a
-            posição estiver ao alcance da mobilidade declarada a partir da sua localidade atual, tiver declarado
-            essa posição como Prioridade de interesse 1 ou 2, e atingir {threshold} pontos ou mais no total.
-          </div>
-        </div>
       </div>
     </section>
   );

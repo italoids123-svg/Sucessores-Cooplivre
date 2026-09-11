@@ -312,7 +312,9 @@ export const HIERARQUIA: HierarquiaEntry[] = [
   { nivel: "Diretoria", elegivel: "Gerência Executiva" },
   { nivel: "Gerência Executiva", elegivel: "Gerência" },
   { nivel: "Gerência", elegivel: "Coordenação" },
+  { nivel: "Gerência", elegivel: "Especialista" },
   { nivel: "Coordenação", elegivel: "Analista" },
+  { nivel: "Especialista", elegivel: "Analista" },
 ];
 
 export const LEVEL_GROUPS: Record<PageKey, string[]> = {

@@ -11,7 +11,7 @@ interface AppContextValue {
   chairs: Chair[];
   people: Person[];
   hierarquia: typeof HIERARQUIA;
-  hierMap: Record<string, string>;
+  hierMap: Record<string, string[]>;
   succession: SuccessionMap;
   dataVersion: number;
   baseUpdatedAt: Date | null;

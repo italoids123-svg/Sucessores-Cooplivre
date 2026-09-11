@@ -24,7 +24,14 @@ export default function CandidateCard({ person, chair }: { person: Person; chair
     <div className="cand-card">
       <div className="cand-top">
         <div>
-          <div className="cand-name">{person.nome}</div>
+          <div className="cand-name">
+            {sc.matchLider > 0 ? (
+              <span className="cand-match-star" title="Match Indicação Líder">
+                ★
+              </span>
+            ) : null}
+            {person.nome}
+          </div>
           <div className="cand-sub">
             {person.cargo} · {person.nivel}
           </div>
