@@ -70,22 +70,22 @@ export default function ChairModal() {
         </div>
         <div className="modal-kpis">
           <div className="modal-kpi">
-            <div className="mk-label">Sucessores mapeados</div>
+            <div className="mk-label">Interessados dentro da pontuação de aderência</div>
             <div className="mk-value">{successors.length}</div>
           </div>
           <div className="modal-kpi">
-            <div className="mk-label">Ainda não mapeados</div>
+            <div className="mk-label">Interessados abaixo da pontuação de aderência</div>
             <div className="mk-value">{naoMapeados.length}</div>
           </div>
           <div className="modal-kpi">
-            <div className="mk-label">Outros interessados</div>
+            <div className="mk-label">Interessados fora da hierarquia elegível</div>
             <div className="mk-value">{outros.length}</div>
           </div>
         </div>
         <div className="modal-sections">
-          <Section title="Sucessores mapeados" people={successors} chairId={chair.id} chair={chair} />
-          <Section title="Ainda não mapeados" people={naoMapeados} chairId={chair.id} chair={chair} />
-          <Section title="Outros interessados" people={outros} chairId={chair.id} chair={chair} />
+          <Section title="Interessados dentro da pontuação de aderência" people={successors} chairId={chair.id} chair={chair} />
+          <Section title="Interessados abaixo da pontuação de aderência" people={naoMapeados} chairId={chair.id} chair={chair} />
+          <Section title="Interessados fora da hierarquia elegível" people={outros} chairId={chair.id} chair={chair} />
         </div>
       </div>
     </div>

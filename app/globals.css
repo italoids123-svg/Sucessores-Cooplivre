@@ -182,9 +182,9 @@ table.elig tr:hover td{background:#fafdfd}
 .regua-nao-conta{color:var(--muted);font-weight:700}
 
 /* ---- Modal de cadeira ---- */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(6,20,23,.5);z-index:80;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(6,20,23,.5);z-index:80;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow-y:auto}
 .modal-overlay.open{display:flex}
-.modal-box{background:#fff;border-radius:16px;max-width:760px;width:100%;box-shadow:0 30px 70px rgba(0,10,12,.35);overflow:hidden}
+.modal-box{background:#fff;border-radius:16px;max-width:1120px;width:100%;box-shadow:0 30px 70px rgba(0,10,12,.35);overflow:hidden}
 .modal-head{display:flex;align-items:flex-start;gap:14px;padding:22px 24px 18px;position:relative}
 .modal-head-bar{position:absolute;left:0;top:0;bottom:0;width:5px}
 .modal-head-bar.st-hi{background:var(--green)}
@@ -199,7 +199,7 @@ table.elig tr:hover td{background:#fafdfd}
 .modal-kpi{background:var(--paper);border-radius:10px;padding:12px 14px}
 .modal-kpi .mk-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700}
 .modal-kpi .mk-value{font-size:24px;font-weight:800;margin-top:6px;color:var(--ink)}
-.modal-sections{padding:0 24px 24px;max-height:56vh;overflow-y:auto}
+.modal-sections{padding:0 24px 24px;max-height:70vh;overflow-y:auto}
 .modal-section{margin-bottom:20px}
 .modal-section h4{font-size:13.5px;margin-bottom:10px}
 .modal-empty{background:var(--paper);border-radius:10px;padding:14px;font-size:12px;color:var(--muted);text-align:center}

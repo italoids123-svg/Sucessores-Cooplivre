@@ -128,7 +128,8 @@ export default function CriteriaPage() {
             <br />
             <br />
             <b>Também define elegibilidade geográfica:</b> além de pontuar, essa resposta filtra, para cada posição,
-            quem pode contar como sucessor e quem pode aparecer em &quot;Outros interessados&quot; — cada opção é
+            quem pode contar como sucessor e quem pode aparecer em &quot;Interessados fora da hierarquia
+            elegível&quot; — cada opção é
             avaliada de forma independente, sem exceção automática para quem já está na cidade da posição: &quot;Local
             atual&quot; só alcança a própria cidade, &quot;Sede&quot; só alcança Capivari (mesmo que a localidade atual
             seja outra), &quot;Raio de 40 km&quot; usa a distância rodoviária estimada, e &quot;Qualquer unidade&quot;

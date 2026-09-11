@@ -188,9 +188,9 @@ export default function EligibilityPage() {
             <tr>
               <th>Cadeira</th>
               <th>Nível</th>
-              <th>Sucessores mapeados</th>
-              <th>Ainda não mapeados</th>
-              <th>Outros interessados</th>
+              <th>Interessados dentro da pontuação de aderência</th>
+              <th>Interessados abaixo da pontuação de aderência</th>
+              <th>Interessados fora da hierarquia elegível</th>
               <th>Base aplicável</th>
               <th>Sucessor indicado</th>
             </tr>
