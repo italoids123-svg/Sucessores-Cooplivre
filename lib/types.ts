@@ -44,6 +44,7 @@ export interface SuccessionRecord {
   horizonte2?: Horizonte;
   desenvolvimento2?: string;
   mobilidade?: Mobilidade;
+  localidadeAtual?: string;
   conversaDesenvolvimento?: ConversaDesenvolvimento;
   continuidade?: Continuidade;
   possivelSucessorTexto?: string;

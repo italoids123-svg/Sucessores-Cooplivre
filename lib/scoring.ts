@@ -1,4 +1,5 @@
 import { CRITERIA } from "./criteria";
+import { mobilidadeAlcancaCidade } from "./geo";
 import type { Chair, ChairScore, HierarquiaEntry, Person, SuccessionMap, SuccessionRecord } from "./types";
 
 export const INT_MAP = Object.fromEntries(CRITERIA.interesse.scale.map((x) => [x.key, x]));
@@ -137,10 +138,24 @@ export function aderenciaBand(total: number): { label: string; cls: string } {
   if (total >= 40) return { label: "Aderência inicial", cls: "init" };
   return { label: "Baixa aderência", cls: "low" };
 }
-export function feederPoolFor(hierMap: Record<string, string>, people: Person[], chair: Chair): Person[] {
+// Localidade atual da pessoa para fins de mobilidade: a resposta explícita do
+// questionário de interesse, ou — na ausência dela — a cidade da cadeira que ela
+// ocupa hoje.
+function localidadeAtualDe(succession: SuccessionMap, chairs: Chair[], person: Person): string | null {
+  const explicita = (succession[person.id] || {}).localidadeAtual;
+  if (explicita) return explicita;
+  const chairAtual = chairs.find((c) => c.id === person.chairId);
+  return chairAtual ? chairAtual.cidade : null;
+}
+export function feederPoolFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
   const feederLevel = hierMap[chair.nivel];
   if (!feederLevel) return [];
-  return people.filter((p) => p.nivel === feederLevel && p.diretoria === chair.diretoria);
+  return people.filter(
+    (p) =>
+      p.nivel === feederLevel &&
+      p.diretoria === chair.diretoria &&
+      mobilidadeAlcancaCidade(localidadeAtualDe(succession, chairs, p), chair.cidade, (succession[p.id] || {}).mobilidade)
+  );
 }
 // Ordena por aderência (score total para a cadeira), da maior para a menor.
 function sortByScoreDesc(succession: SuccessionMap, people: Person[], chair: Chair, candidates: Person[]): Person[] {
@@ -149,25 +164,25 @@ function sortByScoreDesc(succession: SuccessionMap, people: Person[], chair: Cha
   );
 }
 // Sucessores mapeados: elegível (nível+diretoria) + interesse declarado (1ª ou 2ª) + score >= limiar
-export function successorsFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chair: Chair): Person[] {
-  const list = feederPoolFor(hierMap, people, chair).filter((p) => {
+export function successorsFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
+  const list = feederPoolFor(hierMap, succession, people, chairs, chair).filter((p) => {
     const sc = scoreForChair(succession, people, p.id, chair);
     return sc.which > 0 && sc.total >= CRITERIA.eligibilityThreshold;
   });
   return sortByScoreDesc(succession, people, chair, list);
 }
 // Ainda não mapeados: elegível + interesse declarado, mas score abaixo do limiar (em desenvolvimento)
-export function aindaNaoMapeadosFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chair: Chair): Person[] {
-  const list = feederPoolFor(hierMap, people, chair).filter((p) => {
+export function aindaNaoMapeadosFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
+  const list = feederPoolFor(hierMap, succession, people, chairs, chair).filter((p) => {
     const sc = scoreForChair(succession, people, p.id, chair);
     return sc.which > 0 && sc.total < CRITERIA.eligibilityThreshold;
   });
   return sortByScoreDesc(succession, people, chair, list);
 }
-// Outros interessados: declararam interesse nessa posição mas não estão no nível/diretoria elegível
-export function outrosInteressadosFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chair: Chair): Person[] {
+// Outros interessados: declararam interesse nessa posição mas não estão no nível/diretoria/mobilidade elegíveis
+export function outrosInteressadosFor(hierMap: Record<string, string>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
   const targetCargo = normCargo(chair.cargo);
-  const feederIds = new Set(feederPoolFor(hierMap, people, chair).map((p) => p.id));
+  const feederIds = new Set(feederPoolFor(hierMap, succession, people, chairs, chair).map((p) => p.id));
   const list = people.filter((p) => !feederIds.has(p.id) && interestMatch(succession, p, targetCargo) > 0);
   return sortByScoreDesc(succession, people, chair, list);
 }

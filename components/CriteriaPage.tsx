@@ -124,7 +124,13 @@ export default function CriteriaPage() {
             </tbody>
           </table>
           <div className="note">
-            Amplitude geográfica que o candidato aceita para o desafio.
+            Amplitude geográfica que o candidato aceita para o desafio, a partir da localidade atual declarada.
+            <br />
+            <br />
+            <b>Também define elegibilidade geográfica:</b> além de pontuar, essa resposta filtra quem entra no pool
+            de sucessores de cada posição — só contam as pessoas cuja localidade atual está ao alcance da
+            abrangência escolhida (mesma cidade, sede administrativa, raio de 40 km ou qualquer unidade, conforme a
+            opção). Quem fica de fora só por esse motivo aparece em &quot;Outros interessados&quot; na posição.
             <br />
             <br />
             <b>Normalização:</b> a soma bruta dos critérios é convertida em percentual de aproveitamento — pontos

@@ -39,9 +39,9 @@ export default function ChairModal() {
     );
   }
 
-  const successors = successorsFor(hierMap, succession, people, chair);
-  const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chair);
-  const outros = outrosInteressadosFor(hierMap, succession, people, chair);
+  const successors = successorsFor(hierMap, succession, people, chairs, chair);
+  const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chairs, chair);
+  const outros = outrosInteressadosFor(hierMap, succession, people, chairs, chair);
   const cls = successors.length >= 2 ? "st-hi" : successors.length === 1 ? "st-mid" : "st-low";
 
   return (

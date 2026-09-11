@@ -114,7 +114,7 @@ export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
       b1 = 0,
       b0 = 0;
     chairsInLevel.forEach((c) => {
-      const n = successorsFor(hierMap, succession, people, c).length;
+      const n = successorsFor(hierMap, succession, people, chairs, c).length;
       if (n >= 2) b2++;
       else if (n === 1) b1++;
       else b0++;
@@ -124,7 +124,7 @@ export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
     const p1 = Math.round((b1 / total) * 100);
     const p0 = 100 - p2 - p1;
     return { pct2: p2, pct1: p1, pct0: p0, bucket2: b2, bucket1: b1, bucket0: b0 };
-  }, [chairsInLevel, hierMap, succession, people]);
+  }, [chairsInLevel, hierMap, succession, people, chairs]);
 
   const { pdiPct, respondentesCount, scopeCount } = useMemo(() => {
     const feederLevels = [...new Set(pageLevels.map((l) => hierMap[l]).filter(Boolean))];

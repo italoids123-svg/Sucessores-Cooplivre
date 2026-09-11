@@ -5,13 +5,13 @@ import { aindaNaoMapeadosFor, occupantLabel, outrosInteressadosFor, successorsFo
 import type { Chair } from "@/lib/types";
 
 export default function ChairCard({ chair }: { chair: Chair }) {
-  const { hierMap, succession, people, openModal } = useApp();
+  const { chairs, hierMap, succession, people, openModal } = useApp();
 
-  const nSucc = successorsFor(hierMap, succession, people, chair).length;
+  const nSucc = successorsFor(hierMap, succession, people, chairs, chair).length;
   const cls = nSucc >= 2 ? "st-hi" : nSucc === 1 ? "st-mid" : "st-low";
   const statusLabel = nSucc >= 2 ? `${nSucc} sucessores` : nSucc === 1 ? "1 sucessor" : "Sem sucessor";
-  const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chair).length;
-  const outros = outrosInteressadosFor(hierMap, succession, people, chair).length;
+  const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chairs, chair).length;
+  const outros = outrosInteressadosFor(hierMap, succession, people, chairs, chair).length;
 
   let secondary: string;
   if (naoMapeados > 0) secondary = `${naoMapeados} ainda não mapeado${naoMapeados === 1 ? "" : "s"}`;

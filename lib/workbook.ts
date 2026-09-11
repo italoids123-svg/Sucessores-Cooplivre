@@ -1,5 +1,6 @@
 import * as XLSX from "xlsx";
 import { CONT_LABELS, CONV_LABELS, CRITERIA } from "./criteria";
+import { CIDADES_CONHECIDAS } from "./geo";
 import { INT_MAP, MOB_MAP, nbResolve, normCargo, normName } from "./scoring";
 import type { Chair, Person, SuccessionMap, SuccessionRecord } from "./types";
 
@@ -31,12 +32,13 @@ const LEIAME_ROWS: (string[])[] = [
   ["Lidera equipe (Sim/Não)", "Indica se a pessoa tem equipe direta. Só quem lidera equipe é avaliado no critério Favorabilidade do time."],
   ["Favorabilidade do time 2026 (%)", "Percentual de 0 a 100 da favorabilidade do TIME QUE A PESSOA LIDERA, no corte de gestão imediata do relatório GPTW — ciclo único 2026, sem ponderação entre anos. Faixas: 85 ou mais = 10 pts / 76 a 84 = 7 pts / 68 a 75 = 4 pts / abaixo de 68 = 1 pt. Deixe EM BRANCO quando o GPTW suprimiu o corte (time com menos de 5 pessoas) — não invente nem estime valor."],
   ["Normalização da pontuação", "A soma bruta dos critérios não é o score final. O score é: pontos obtidos ÷ pontos aplicáveis × 100. Quem lidera equipe e tem favorabilidade preenchida disputa em 100 pontos aplicáveis. Quem não lidera equipe, ou lidera mas está sem favorabilidade, disputa em 90 pontos aplicáveis — não recebe zero no critério, ele simplesmente não se aplica. O corte de elegibilidade de " + CRITERIA.eligibilityThreshold + " é lido sobre esse percentual de aproveitamento."],
-  ["Mobilidade", "Use exatamente um destes textos: " + MOB_LABELS.join(" / ") + "."],
+  ["Localidade atual", "Cidade onde a pessoa atua hoje (ver lista em \"Valores aceitos\"). Em branco, o dashboard usa a cidade da cadeira que ela ocupa atualmente."],
+  ["Mobilidade", "Use exatamente um destes textos: " + MOB_LABELS.join(" / ") + ". Além de pontuar, define a que distância da Localidade atual a pessoa pode ser considerada sucessora — ver Elegibilidade."],
   ["Conversa sobre desenvolvimento", "Use exatamente um destes textos: " + Object.values(CONV_LABELS).join(" / ") + "."],
   ["Continuidade da posição atual", "Use exatamente um destes textos: " + Object.values(CONT_LABELS).join(" / ") + "."],
   ["Possível sucessor da posição atual", "Resposta aberta — nome completo e cargo da pessoa indicada pelo ocupante atual como possível sucessor."],
   ["Match Indicação Líder", 'Não é preenchido diretamente. O dashboard calcula automaticamente quando o líder (ocupante da cadeira) indica nominalmente um liderado em "Possível sucessor da posição atual" e esse liderado declarou a mesma posição como Prioridade de interesse 1 ou 2 — só conta quando os dois responderam.'],
-  ["Elegibilidade", "Para contar como sucessor no heatmap, a pessoa precisa estar no nível e na mesma diretoria elegíveis pela Hierarquia, ter indicado a posição em Prioridade de interesse 1 ou 2, e atingir " + CRITERIA.eligibilityThreshold + " ou mais no score normalizado."],
+  ["Elegibilidade", "Para contar como sucessor no heatmap, a pessoa precisa estar no nível e na mesma diretoria elegíveis pela Hierarquia, ter a posição ao alcance da sua Mobilidade a partir da Localidade atual (mesma cidade, Sede, raio de 40 km ou qualquer unidade, conforme a resposta), ter indicado a posição em Prioridade de interesse 1 ou 2, e atingir " + CRITERIA.eligibilityThreshold + " ou mais no score normalizado. Quem fica de fora só pela Localidade/Mobilidade aparece em \"Outros interessados\"."],
   ["Se nada mudar após carregar", 'Confirme que a aba se chama exatamente "Base de dados" e que os cabeçalhos da primeira linha não foram alterados. O aviso mostrado após o carregamento sempre diz quantas pessoas foram atualizadas e quantas são novas — se aparecer 0 em tudo, o arquivo não foi reconhecido como este modelo.'],
 ];
 
@@ -64,6 +66,7 @@ export function buildWorkbook(chairs: Chair[], people: Person[], hierarquia: { n
       "Prioridade de interesse 2": s.prioridade2 || "",
       "Horizonte da prioridade 2": s.horizonte2 ? INT_MAP[s.horizonte2]?.label || "" : "",
       "Desenvolvimento para a prioridade 2": s.desenvolvimento2 || "",
+      "Localidade atual": s.localidadeAtual || "",
       Mobilidade: s.mobilidade ? MOB_MAP[s.mobilidade]?.label || "" : "",
       "Conversa sobre desenvolvimento": s.conversaDesenvolvimento ? CONV_LABELS[s.conversaDesenvolvimento] || "" : "",
       "Continuidade da posição atual": s.continuidade ? CONT_LABELS[s.continuidade] || "" : "",
@@ -75,7 +78,7 @@ export function buildWorkbook(chairs: Chair[], people: Person[], hierarquia: { n
     };
   });
   const baseWs = XLSX.utils.json_to_sheet(baseRows);
-  baseWs["!cols"] = [{ wch: 9 }, { wch: 28 }, { wch: 16 }, { wch: 32 }, { wch: 34 }, { wch: 18 }, { wch: 34 }, { wch: 34 }, { wch: 18 }, { wch: 34 }, { wch: 16 }, { wch: 26 }, { wch: 30 }, { wch: 32 }, { wch: 20 }, { wch: 20 }, { wch: 18 }, { wch: 22 }];
+  baseWs["!cols"] = [{ wch: 9 }, { wch: 28 }, { wch: 16 }, { wch: 32 }, { wch: 34 }, { wch: 18 }, { wch: 34 }, { wch: 34 }, { wch: 18 }, { wch: 34 }, { wch: 18 }, { wch: 16 }, { wch: 26 }, { wch: 30 }, { wch: 32 }, { wch: 20 }, { wch: 20 }, { wch: 18 }, { wch: 22 }];
   XLSX.utils.book_append_sheet(wbNew, baseWs, "Base de dados");
 
   const hierRows = hierarquia.map((h) => ({ "Nível da posição": h.nivel, "Nível elegível": h.elegivel }));
@@ -86,6 +89,7 @@ export function buildWorkbook(chairs: Chair[], people: Person[], hierarquia: { n
   const refWs = XLSX.utils.aoa_to_sheet([
     ["Nine Box 2025 / Nine Box 2026 — quadrantes aceitos"], ...NB_REF_LINES.map((x) => [x]), [""],
     ["Horizonte da prioridade 1 / 2"], ...INT_LABELS.map((x) => [x]), [""],
+    ["Localidade atual — localidades cadastradas"], ...CIDADES_CONHECIDAS.map((x) => [x]), [""],
     ["Mobilidade"], ...MOB_LABELS.map((x) => [x]), [""],
     ["Conversa sobre desenvolvimento"], ...Object.values(CONV_LABELS).map((x) => [x]), [""],
     ["Continuidade da posição atual"], ...Object.values(CONT_LABELS).map((x) => [x]), [""],
@@ -244,6 +248,7 @@ export async function parseUploadedWorkbook(file: File, chairsIn: Chair[], peopl
         prioridade2: cell(row, "Prioridade de interesse 2") || "",
         horizonte2: (INT_LABEL_TO_KEY[hz2] as SuccessionRecord["horizonte2"]) || "",
         desenvolvimento2: cell(row, "Desenvolvimento para a prioridade 2") || "",
+        localidadeAtual: cell(row, "Localidade atual") || "",
         mobilidade: (MOB_LABEL_TO_KEY[mobTxt] as SuccessionRecord["mobilidade"]) || "",
         conversaDesenvolvimento: (CONV_LABEL_TO_KEY[convTxt] as SuccessionRecord["conversaDesenvolvimento"]) || "",
         continuidade: (CONT_LABEL_TO_KEY[contTxt] as SuccessionRecord["continuidade"]) || "",

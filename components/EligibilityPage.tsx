@@ -54,8 +54,11 @@ export default function EligibilityPage() {
             <div className="rules-step">
               <span className="rs-n">2</span>
               <div>
-                <b>Elegibilidade hierárquica</b>
-                <p>O nível (e a diretoria) atual está relacionado à posição na aba Hierarquia.</p>
+                <b>Elegibilidade hierárquica e geográfica</b>
+                <p>
+                  O nível (e a diretoria) atual está relacionado à posição na aba Hierarquia, e a localidade atual da
+                  pessoa está ao alcance da posição de acordo com a mobilidade declarada.
+                </p>
               </div>
             </div>
             <div className="rules-step">
@@ -153,9 +156,9 @@ export default function EligibilityPage() {
           </thead>
           <tbody>
             {rows.map((c) => {
-              const succ = successorsFor(hierMap, succession, people, c);
-              const naoMap = aindaNaoMapeadosFor(hierMap, succession, people, c);
-              const outros = outrosInteressadosFor(hierMap, succession, people, c);
+              const succ = successorsFor(hierMap, succession, people, chairs, c);
+              const naoMap = aindaNaoMapeadosFor(hierMap, succession, people, chairs, c);
+              const outros = outrosInteressadosFor(hierMap, succession, people, chairs, c);
               const avaliados = [...succ, ...naoMap];
               const em100 = avaliados.filter((p) => scoreForChair(succession, people, p.id, c).favAplica).length;
               const em90 = avaliados.length - em100;
@@ -223,9 +226,9 @@ export default function EligibilityPage() {
             </div>
           ))}
           <div style={{ fontSize: "11px", color: "var(--muted)", marginTop: "4px" }}>
-            Um candidato só conta como sucessor de uma cadeira se estiver no nível e na diretoria elegíveis, tiver
-            declarado essa posição como Prioridade de interesse 1 ou 2, e atingir {threshold} pontos ou mais no
-            total.
+            Um candidato só conta como sucessor de uma cadeira se estiver no nível e na diretoria elegíveis, se a
+            posição estiver ao alcance da mobilidade declarada a partir da sua localidade atual, tiver declarado
+            essa posição como Prioridade de interesse 1 ou 2, e atingir {threshold} pontos ou mais no total.
           </div>
         </div>
       </div>
