@@ -1,9 +1,11 @@
 "use client";
 
 import ChairModal from "./ChairModal";
+import CityPage from "./CityPage";
 import CriteriaPage from "./CriteriaPage";
 import EligibilityPage from "./EligibilityPage";
 import LevelPages from "./LevelPages";
+import MapPage from "./MapPage";
 import Notice from "./Notice";
 import QuestionnairePage from "./QuestionnairePage";
 import Sidebar from "./Sidebar";
@@ -22,6 +24,8 @@ export default function Dashboard() {
           <EligibilityPage />
           <CriteriaPage />
           <QuestionnairePage />
+          <MapPage />
+          <CityPage />
         </main>
       </div>
       <ChairModal />

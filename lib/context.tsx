@@ -4,7 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { CHAIRS as INITIAL_CHAIRS, HIERARQUIA, PEOPLE as INITIAL_PEOPLE } from "./data";
 import { clearPersistedState, loadPersistedState, savePersistedState } from "./persistence";
 import { buildHierMap } from "./scoring";
-import type { Chair, NavPage, Person, SuccessionMap } from "./types";
+import type { Chair, NavPage, PageKey, Person, SuccessionMap } from "./types";
 import { downloadWorkbook, parseUploadedWorkbook } from "./workbook";
 
 interface AppContextValue {
@@ -18,6 +18,12 @@ interface AppContextValue {
 
   activePage: NavPage;
   setActivePage: (p: NavPage) => void;
+
+  activeCity: string | null;
+  openCity: (cidade: string) => void;
+  closeCity: () => void;
+  cityLevelFilter: PageKey | null;
+  toggleCityLevelFilter: (level: PageKey) => void;
 
   modalChairId: string | null;
   openModal: (chairId: string) => void;
@@ -45,6 +51,8 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [baseUpdatedAt, setBaseUpdatedAt] = useState<Date | null>(null);
 
   const [activePage, setActivePage] = useState<NavPage>("directors");
+  const [activeCity, setActiveCity] = useState<string | null>(null);
+  const [cityLevelFilter, setCityLevelFilter] = useState<PageKey | null>(null);
   const [modalChairId, setModalChairId] = useState<string | null>(null);
   const [showNominal, setShowNominal] = useState(false);
   const [notice, setNotice] = useState<string | null>(null);
@@ -87,6 +95,16 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   const openModal = useCallback((chairId: string) => setModalChairId(chairId), []);
   const closeModal = useCallback(() => setModalChairId(null), []);
+
+  const openCity = useCallback((cidade: string) => {
+    setActiveCity(cidade);
+    setCityLevelFilter(null);
+    setActivePage("cidade");
+  }, []);
+  const closeCity = useCallback(() => setActivePage("mapa"), []);
+  const toggleCityLevelFilter = useCallback((level: PageKey) => {
+    setCityLevelFilter((cur) => (cur === level ? null : level));
+  }, []);
 
   const showNotice = useCallback((msg: string) => setNotice(msg), []);
   const closeNotice = useCallback(() => setNotice(null), []);
@@ -135,6 +153,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     baseUpdatedAt,
     activePage,
     setActivePage,
+    activeCity,
+    openCity,
+    closeCity,
+    cityLevelFilter,
+    toggleCityLevelFilter,
     modalChairId,
     openModal,
     closeModal,

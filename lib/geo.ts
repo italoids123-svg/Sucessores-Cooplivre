@@ -6,7 +6,7 @@ export const SEDE_CIDADE = "Capivari";
 // Latitude/longitude das localidades usadas nas cadeiras do mapa (fonte: cadastro
 // de agências da análise de cobertura de rede da Cooplivre). Usado só para estimar
 // distância — não é uma base de endereços completa.
-const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
+export const CITY_COORDS: Record<string, { lat: number; lng: number }> = {
   capivari: { lat: -22.995144, lng: -47.50715 },
   "porto feliz": { lat: -23.209299, lng: -47.525101 },
   tiete: { lat: -23.1019, lng: -47.714 },
@@ -61,6 +61,12 @@ export function normalizeCidade(s?: string | null): string {
     .normalize("NFD")
     .replace(/[̀-ͯ]/g, "")
     .trim();
+}
+
+// Coordenadas de uma cidade cadastrada, ou null se não houver latitude/longitude
+// conhecida para ela (mapa não deve tentar plotar um marcador nesse caso).
+export function coordsFor(cidade: string): { lat: number; lng: number } | null {
+  return CITY_COORDS[normalizeCidade(cidade)] || null;
 }
 
 // Distância rodoviária estimada em km entre duas localidades: linha reta (Haversine)

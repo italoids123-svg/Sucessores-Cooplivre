@@ -325,3 +325,12 @@ export const LEVEL_GROUPS: Record<PageKey, string[]> = {
   analista: ["Analista"],
   especialista: ["Especialista"],
 };
+
+export const LEVEL_LABELS: Record<PageKey, string> = {
+  directors: "Diretoria",
+  executive: "Gerência Executiva",
+  management: "Gerência",
+  coordenacao: "Coordenação",
+  especialista: "Especialista",
+  analista: "Analista",
+};

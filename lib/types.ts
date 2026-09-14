@@ -1,7 +1,7 @@
 export type Nivel = "C-Level" | "Diretoria" | "Gerência Executiva" | "Gerência" | "Coordenação" | "Analista" | "Especialista";
 
 export type PageKey = "directors" | "executive" | "management" | "coordenacao" | "analista" | "especialista";
-export type NavPage = PageKey | "eligibility" | "criteria" | "questionnaire";
+export type NavPage = PageKey | "eligibility" | "criteria" | "questionnaire" | "mapa" | "cidade";
 
 export interface Chair {
   id: string;
