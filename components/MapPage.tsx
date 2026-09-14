@@ -67,13 +67,11 @@ export default function MapPage() {
 
         L.control.zoom({ position: "bottomright" }).addTo(map);
 
-        // Overlay de proximidade (aproximação visual das divisas entre cidades por
-        // vizinho mais próximo — não são limites municipais reais, que não estão
-        // disponíveis como dado embarcado; serve só para dar noção de território).
-        buildProximityOverlay(L, map, cityStats);
-
         cityStats.forEach((s) => {
-          const radius = 8 + Math.min(s.total, 40) * 0.35;
+          // Raio contido (máx. ~17px) para não engolir rótulos e estradas vizinhas
+          // do próprio mapa de fundo — as cidades cadastradas ficam bem próximas
+          // umas das outras nesta região.
+          const radius = 6 + Math.min(s.total, 40) * 0.22;
           const color = s.cobertura >= 60 ? "#1f8a5c" : s.cobertura >= 30 ? "#c9930f" : "#c0392b";
           const marker = L.circleMarker([s.lat, s.lng], {
             radius,
@@ -88,7 +86,10 @@ export default function MapPage() {
             offset: [0, -radius],
           });
 
-          marker.on("mouseover", () => marker.setStyle({ weight: 3.5 }).setRadius(radius * 1.18));
+          marker.on("mouseover", () => {
+            marker.bringToFront();
+            marker.setStyle({ weight: 3.5 }).setRadius(radius * 1.12);
+          });
           marker.on("mouseout", () => marker.setStyle({ weight: 2 }).setRadius(radius));
           marker.on("click", () => openCity(s.cidade));
         });
@@ -172,60 +173,4 @@ export default function MapPage() {
       </div>
     </section>
   );
-}
-
-// Aproxima visualmente a "divisa" entre cidades atribuindo cada pixel do mapa à
-// cidade cadastrada mais próxima (linha reta) — não é um limite municipal real
-// (que exigiria uma base de polígonos que não temos embarcada), só ajuda a dar
-// noção de território ao redor de cada marcador.
-function buildProximityOverlay(L: typeof import("leaflet"), map: LeafletMap, stats: CityStat[]) {
-  if (stats.length < 2) return;
-  const bounds = map.getBounds().pad(0.6);
-  const size = 220;
-  const canvas = document.createElement("canvas");
-  canvas.width = size;
-  canvas.height = size;
-  const ctx = canvas.getContext("2d");
-  if (!ctx) return;
-
-  const sw = bounds.getSouthWest();
-  const ne = bounds.getNorthEast();
-  const palette = [
-    "60,120,160",
-    "90,150,110",
-    "170,130,60",
-    "150,90,140",
-    "70,140,150",
-    "160,100,90",
-    "110,110,170",
-    "130,150,70",
-  ];
-
-  const img = ctx.createImageData(size, size);
-  for (let py = 0; py < size; py++) {
-    const lat = ne.lat - (py / size) * (ne.lat - sw.lat);
-    for (let px = 0; px < size; px++) {
-      const lng = sw.lng + (px / size) * (ne.lng - sw.lng);
-      let best = 0;
-      let bestDist = Infinity;
-      for (let i = 0; i < stats.length; i++) {
-        const dLat = stats[i].lat - lat;
-        const dLng = stats[i].lng - lng;
-        const d = dLat * dLat + dLng * dLng;
-        if (d < bestDist) {
-          bestDist = d;
-          best = i;
-        }
-      }
-      const [r, g, b] = palette[best % palette.length].split(",").map(Number);
-      const idx = (py * size + px) * 4;
-      img.data[idx] = r;
-      img.data[idx + 1] = g;
-      img.data[idx + 2] = b;
-      img.data[idx + 3] = 40;
-    }
-  }
-  ctx.putImageData(img, 0, 0);
-
-  L.imageOverlay(canvas.toDataURL(), bounds, { opacity: 0.5, interactive: false }).addTo(map);
 }
