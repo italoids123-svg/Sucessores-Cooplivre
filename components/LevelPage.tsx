@@ -160,32 +160,38 @@ export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
           <div className="coverage-bar">
             {pct2 > 0 ? (
               <span className="seg-hi" style={{ width: `${pct2}%` }}>
-                {pct2}% ({bucket2})
+                {pct2 >= 15 ? `${pct2}% (${bucket2})` : ""}
               </span>
             ) : null}
             {pct1 > 0 ? (
               <span className="seg-mid" style={{ width: `${pct1}%` }}>
-                {pct1}% ({bucket1})
+                {pct1 >= 15 ? `${pct1}% (${bucket1})` : ""}
               </span>
             ) : null}
             {pct0 > 0 ? (
               <span className="seg-low" style={{ width: `${pct0}%` }}>
-                {pct0}% ({bucket0})
+                {pct0 >= 15 ? `${pct0}% (${bucket0})` : ""}
               </span>
             ) : null}
           </div>
           <div className="coverage-legend">
             <div className="cl-item">
               <i className="seg-hi"></i>
-              <span>2 ou mais sucessores</span>
+              <span>
+                2 ou mais sucessores · {bucket2} ({pct2}%)
+              </span>
             </div>
             <div className="cl-item">
               <i className="seg-mid"></i>
-              <span>1 sucessor</span>
+              <span>
+                1 sucessor · {bucket1} ({pct1}%)
+              </span>
             </div>
             <div className="cl-item">
               <i className="seg-low"></i>
-              <span>sem sucessor</span>
+              <span>
+                sem sucessor · {bucket0} ({pct0}%)
+              </span>
             </div>
           </div>
         </div>
