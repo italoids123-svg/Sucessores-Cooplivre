@@ -55,14 +55,7 @@ export default function MapPage() {
         const L = (await import("leaflet")).default;
         if (cancelled || !mapDivRef.current || mapRef.current) return;
 
-        // Visão estática: sem arrastar/pan pelo cursor ou teclado, para o mapa não
-        // "andar" para fora da área enquadrada — zoom pelos botões continua ativo.
-        const map = L.map(mapDivRef.current, {
-          zoomControl: false,
-          dragging: false,
-          touchZoom: false,
-          keyboard: false,
-        }).setView([-23.05, -47.45], 10);
+        const map = L.map(mapDivRef.current, { zoomControl: false }).setView([-23.05, -47.45], 10);
         mapRef.current = map;
 
         const tiles = L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
