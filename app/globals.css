@@ -194,7 +194,7 @@ table.elig tr:hover td{background:#fafdfd}
 .regua-nao-conta{color:var(--muted);font-weight:700}
 
 /* ---- Modal de cadeira ---- */
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(6,20,23,.5);z-index:80;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow-y:auto}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(6,20,23,.5);z-index:1300;align-items:flex-start;justify-content:center;padding:4vh 16px;overflow-y:auto}
 .modal-overlay.open{display:flex}
 .modal-box{background:#fff;border-radius:16px;max-width:1120px;width:100%;box-shadow:0 30px 70px rgba(0,10,12,.35);overflow:hidden}
 .modal-head{display:flex;align-items:flex-start;gap:14px;padding:22px 24px 18px;position:relative}
