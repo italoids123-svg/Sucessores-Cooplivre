@@ -257,13 +257,6 @@ export function countChairBuckets(
   });
   return { b2, b1, b0 };
 }
-export function nineBoxSubLabel(s: SuccessionRecord): string {
-  const r26 = nbResolve(s.nineBox2026);
-  if (r26) return r26.label + " (2026)";
-  const r25 = nbResolve(s.nineBox2025);
-  if (r25) return r25.label + " (2025)";
-  return "Não avaliado";
-}
 export function favSubLabel(s: SuccessionRecord, sc: ChairScore): string {
   if (!sc.favAplica) return s.lideraEquipe ? "Corte GPTW suprimido" : "Não lidera equipe";
   if (s.favorabilidade2026 !== "" && s.favorabilidade2026 != null) return "GPTW 2026: " + s.favorabilidade2026 + "%";

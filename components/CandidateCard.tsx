@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useApp } from "@/lib/context";
 import { CONT_BADGE, CONT_LABELS, CONV_BADGE, CONV_LABELS, CRITERIA } from "@/lib/criteria";
-import { aderenciaBand, favSubLabel, fmtNum, INT_MAP, nineBoxSubLabel, scoreForChair } from "@/lib/scoring";
+import { aderenciaBand, favSubLabel, fmtNum, INT_MAP, nbResolve, scoreForChair } from "@/lib/scoring";
 import type { Chair, Person } from "@/lib/types";
 
 export type CandidateBucket = "dentro" | "abaixo" | "fora";
@@ -24,6 +24,8 @@ export default function CandidateCard({ person, chair, bucket }: { person: Perso
   const sc = scoreForChair(succession, people, person.id, chair);
   const s = succession[person.id] || {};
   const band = aderenciaBand(sc.total);
+  const nb2025 = nbResolve(s.nineBox2025);
+  const nb2026 = nbResolve(s.nineBox2026);
   const convBadge = s.conversaDesenvolvimento ? CONV_BADGE[s.conversaDesenvolvimento] : null;
   const contBadge = s.continuidade ? CONT_BADGE[s.continuidade] : null;
   const horizonteKey = sc.which === 1 ? s.horizonte1 : sc.which === 2 ? s.horizonte2 : null;
@@ -83,7 +85,8 @@ export default function CandidateCard({ person, chair, bucket }: { person: Perso
         <div className="cd-boxes">
           <div className="cd-box">
             <span className="cd-box-label">Nine Box</span>
-            <span className="cd-box-sub">{nineBoxSubLabel(s)}</span>
+            <span className="cd-box-sub">2025: {nb2025 ? `${nb2025.label} (${nb2025.points} pts)` : "Não avaliado"}</span>
+            <span className="cd-box-sub">2026: {nb2026 ? `${nb2026.label} (${nb2026.points} pts)` : "Não avaliado"}</span>
             <b>{fmtNum(sc.nineBox)}/40</b>
           </div>
           <div className="cd-box">
