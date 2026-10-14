@@ -7,6 +7,7 @@ import EligibilityPage from "./EligibilityPage";
 import LevelPages from "./LevelPages";
 import MapPage from "./MapPage";
 import Notice from "./Notice";
+import OverviewPage from "./OverviewPage";
 import QuestionnairePage from "./QuestionnairePage";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
@@ -20,6 +21,7 @@ export default function Dashboard() {
         <Sidebar />
         <main>
           <Notice />
+          <OverviewPage />
           <LevelPages />
           <EligibilityPage />
           <CriteriaPage />

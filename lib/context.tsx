@@ -50,7 +50,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   const [dataVersion, setDataVersion] = useState(0);
   const [baseUpdatedAt, setBaseUpdatedAt] = useState<Date | null>(null);
 
-  const [activePage, setActivePage] = useState<NavPage>("directors");
+  const [activePage, setActivePage] = useState<NavPage>("overview");
   const [activeCity, setActiveCity] = useState<string | null>(null);
   const [cityLevelFilter, setCityLevelFilter] = useState<PageKey | null>(null);
   const [modalChairId, setModalChairId] = useState<string | null>(null);

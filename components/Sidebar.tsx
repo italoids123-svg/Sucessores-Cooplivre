@@ -26,6 +26,15 @@ export default function Sidebar() {
     <aside className="sidebar">
       <div className="side-kicker">Navegação</div>
       <div className="nav-group">
+        <button
+          className={`nav-btn${activePage === "overview" ? " active" : ""}`}
+          onClick={() => setActivePage("overview")}
+        >
+          <i></i>
+          Visão geral
+        </button>
+      </div>
+      <div className="nav-group">
         <div className="nav-group-title">Mapa Sucessório</div>
         {MAP_ITEMS.map((item) => {
           const onCity = activePage === "cidade";
