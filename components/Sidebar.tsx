@@ -13,6 +13,11 @@ const MAP_ITEMS: { key: PageKey; label: string }[] = [
   { key: "analista", label: LEVEL_LABELS.analista },
 ];
 
+const UNIDADE_ITEMS: { key: Extract<NavPage, "uad" | "agencias">; label: string }[] = [
+  { key: "uad", label: "UAD" },
+  { key: "agencias", label: "Agências" },
+];
+
 const METHOD_ITEMS: { key: NavPage; label: string }[] = [
   { key: "eligibility", label: "Elegibilidade e Aderência" },
   { key: "questionnaire", label: "Questionário" },
@@ -33,6 +38,19 @@ export default function Sidebar() {
           <i></i>
           Visão geral
         </button>
+      </div>
+      <div className="nav-group">
+        <div className="nav-group-title">Unidade</div>
+        {UNIDADE_ITEMS.map((item) => (
+          <button
+            key={item.key}
+            className={`nav-btn${activePage === item.key ? " active" : ""}`}
+            onClick={() => setActivePage(item.key)}
+          >
+            <i></i>
+            {item.label}
+          </button>
+        ))}
       </div>
       <div className="nav-group">
         <div className="nav-group-title">Mapa Sucessório</div>

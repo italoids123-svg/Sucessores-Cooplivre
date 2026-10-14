@@ -1,5 +1,6 @@
 "use client";
 
+import AgencyGroupPage from "./AgencyGroupPage";
 import ChairModal from "./ChairModal";
 import CityPage from "./CityPage";
 import CriteriaPage from "./CriteriaPage";
@@ -22,6 +23,8 @@ export default function Dashboard() {
         <main>
           <Notice />
           <OverviewPage />
+          <AgencyGroupPage group="uad" />
+          <AgencyGroupPage group="agencias" />
           <LevelPages />
           <EligibilityPage />
           <CriteriaPage />
