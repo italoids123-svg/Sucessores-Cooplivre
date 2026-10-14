@@ -223,16 +223,18 @@ export function outrosInteressadosFor(hierMap: Record<string, string[]>, success
   );
   return sortByScoreDesc(succession, people, chair, list);
 }
-// Classificação visual da cadeira: saudável (2) = 2+ sucessores mapeados; em atenção
-// (1) = 1 sucessor mapeado, OU nenhum sucessor mas há algum interessado (ainda não
-// mapeado ou fora da hierarquia elegível); crítica (0) = nenhum interessado, de
-// nenhum tipo. Elegibilidade hierárquica e pontuação continuam aparecendo detalhadas
-// por seção (successorsFor/aindaNaoMapeadosFor/outrosInteressadosFor), mas deixam de
-// decidir sozinhas se a cadeira é crítica.
+// Classificação visual da cadeira, pela CONTAGEM TOTAL de interessados — sucessor
+// mapeado, ainda não mapeado ou fora da hierarquia elegível contam igual, sem
+// distinção de pontuação ou elegibilidade hierárquica: saudável (2) = 2 ou mais
+// interessados no total; em atenção (1) = exatamente 1 interessado; crítica (0) =
+// nenhum interessado, de nenhum tipo. Elegibilidade hierárquica e pontuação
+// continuam aparecendo detalhadas por seção (successorsFor/aindaNaoMapeadosFor/
+// outrosInteressadosFor), mas não decidem mais essa classificação.
 export function chairStatusBucket(nSucc: number, naoMapeados: number, outros: number): 0 | 1 | 2 {
-  if (nSucc >= 2) return 2;
-  if (nSucc === 1) return 1;
-  return naoMapeados + outros > 0 ? 1 : 0;
+  const total = nSucc + naoMapeados + outros;
+  if (total >= 2) return 2;
+  if (total === 1) return 1;
+  return 0;
 }
 export function countChairBuckets(
   hierMap: Record<string, string[]>,
