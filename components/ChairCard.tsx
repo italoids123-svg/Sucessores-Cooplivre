@@ -1,15 +1,21 @@
 "use client";
 
 import { useApp } from "@/lib/context";
-import { CIDADES_RESULTADO_NEGATIVO, isAgenciaCargo } from "@/lib/agency";
+import { CIDADE_RESULTADO_SEVERIDADE, isAgenciaCargo } from "@/lib/agency";
 import { aindaNaoMapeadosFor, occupantLabel, outrosInteressadosFor, successorsFor } from "@/lib/scoring";
 import type { Chair } from "@/lib/types";
+
+const SEVERIDADE_LABEL = { critico: "⚠ Crítico", atencao: "⚠ Atenção" } as const;
+const SEVERIDADE_TITLE = {
+  critico: "Agência com menos de 10% do orçado realizado no acumulado e sem sucessor mapeado",
+  atencao: "Agência entre 10% e 50% do orçado realizado no acumulado e sem sucessor mapeado",
+} as const;
 
 export default function ChairCard({ chair }: { chair: Chair }) {
   const { chairs, hierMap, succession, people, openModal } = useApp();
 
   const nSucc = successorsFor(hierMap, succession, people, chairs, chair).length;
-  const alertaResultado = nSucc === 0 && isAgenciaCargo(chair.cargo) && CIDADES_RESULTADO_NEGATIVO.includes(chair.cidade);
+  const severidade = nSucc === 0 && isAgenciaCargo(chair.cargo) ? CIDADE_RESULTADO_SEVERIDADE[chair.cidade] : undefined;
   const cls = nSucc >= 2 ? "st-hi" : nSucc === 1 ? "st-mid" : "st-low";
   const statusLabel = nSucc >= 2 ? `${nSucc} sucessores` : nSucc === 1 ? "1 sucessor" : "Sem sucessor";
   const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chairs, chair).length;
@@ -36,12 +42,9 @@ export default function ChairCard({ chair }: { chair: Chair }) {
       <div className="cc-top-row">
         <h4>{chair.cargo}</h4>
         <div className="cc-top-badges">
-          {alertaResultado ? (
-            <span
-              className="cc-alert-badge"
-              title={`Agência de ${chair.cidade} com resultado abaixo do orçado e sem sucessor mapeado`}
-            >
-              ⚠ Atenção
+          {severidade ? (
+            <span className={`cc-alert-badge sev-${severidade}`} title={SEVERIDADE_TITLE[severidade]}>
+              {SEVERIDADE_LABEL[severidade]}
             </span>
           ) : null}
           {chair.vago ? <span className="cc-vago-badge">Vaga</span> : null}

@@ -166,57 +166,73 @@ export default function OverviewPage() {
         </div>
       </div>
 
-      <div className="kpis">
+      <div className="kpis-5">
         <div className="kpi">
           <div className="kpi-label">Posições</div>
           <div className="kpi-value">{chairs.length}</div>
           <div className="kpi-sub">{people.length} pessoas na base</div>
         </div>
-        <div className="kpi coverage-kpi">
-          <div className="kpi-label">Cobertura sucessória · Todas as posições</div>
-          <div className="coverage-bar">
-            {pct2 > 0 ? (
-              <span className="seg-hi" style={{ width: `${pct2}%` }}>
-                {pct2 >= 15 ? `${pct2}% (${bucket2})` : ""}
-              </span>
-            ) : null}
-            {pct1 > 0 ? (
-              <span className="seg-mid" style={{ width: `${pct1}%` }}>
-                {pct1 >= 15 ? `${pct1}% (${bucket1})` : ""}
-              </span>
-            ) : null}
-            {pct0 > 0 ? (
-              <span className="seg-low" style={{ width: `${pct0}%` }}>
-                {pct0 >= 15 ? `${pct0}% (${bucket0})` : ""}
-              </span>
-            ) : null}
-          </div>
-          <div className="coverage-legend">
-            <div className="cl-item">
-              <i className="seg-hi"></i>
-              <span>
-                2 ou mais sucessores · {bucket2} ({pct2}%)
-              </span>
-            </div>
-            <div className="cl-item">
-              <i className="seg-mid"></i>
-              <span>
-                1 sucessor · {bucket1} ({pct1}%)
-              </span>
-            </div>
-            <div className="cl-item">
-              <i className="seg-low"></i>
-              <span>
-                sem sucessor · {bucket0} ({pct0}%)
-              </span>
-            </div>
-          </div>
+        <div className="kpi">
+          <div className="kpi-label">Saudáveis</div>
+          <div className="kpi-value v-hi">{bucket2}</div>
+          <div className="kpi-sub">2 ou mais sucessores</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi-label">Em atenção</div>
+          <div className="kpi-value v-mid">{bucket1}</div>
+          <div className="kpi-sub">1 sucessor</div>
+        </div>
+        <div className="kpi">
+          <div className="kpi-label">Críticas</div>
+          <div className="kpi-value v-low">{bucket0}</div>
+          <div className="kpi-sub">sem sucessor</div>
         </div>
         <div className="kpi">
           <div className="kpi-label">Questionário respondido</div>
           <div className="kpi-value">{pctRespondido}%</div>
           <div className="kpi-sub">
             {respondentes} de {totalPeople} pessoas
+          </div>
+        </div>
+      </div>
+
+      <div className="kpi coverage-kpi coverage-kpi-full">
+        <div className="kpi-label">Cobertura sucessória · Todas as posições</div>
+        <div className="coverage-bar">
+          {pct2 > 0 ? (
+            <span className="seg-hi" style={{ width: `${pct2}%` }}>
+              {pct2 >= 15 ? `${pct2}% (${bucket2})` : ""}
+            </span>
+          ) : null}
+          {pct1 > 0 ? (
+            <span className="seg-mid" style={{ width: `${pct1}%` }}>
+              {pct1 >= 15 ? `${pct1}% (${bucket1})` : ""}
+            </span>
+          ) : null}
+          {pct0 > 0 ? (
+            <span className="seg-low" style={{ width: `${pct0}%` }}>
+              {pct0 >= 15 ? `${pct0}% (${bucket0})` : ""}
+            </span>
+          ) : null}
+        </div>
+        <div className="coverage-legend">
+          <div className="cl-item">
+            <i className="seg-hi"></i>
+            <span>
+              2 ou mais sucessores · {bucket2} ({pct2}%)
+            </span>
+          </div>
+          <div className="cl-item">
+            <i className="seg-mid"></i>
+            <span>
+              1 sucessor · {bucket1} ({pct1}%)
+            </span>
+          </div>
+          <div className="cl-item">
+            <i className="seg-low"></i>
+            <span>
+              sem sucessor · {bucket0} ({pct0}%)
+            </span>
           </div>
         </div>
       </div>
