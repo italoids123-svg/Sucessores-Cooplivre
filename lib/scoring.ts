@@ -87,13 +87,25 @@ function scorePersonBase(succession: SuccessionMap, personId: string) {
   return { nineBox: scoreNineBox(s), favorabilidade: scoreFavorabilidade(s), mobilidade: scoreMobilidade(s) };
 }
 
+// A cadeira bate com o texto quando a sequência de PALAVRAS do cargo aparece completa
+// em algum trecho do texto (ex.: "Diretor Executivo CEO" cobre a cadeira "CEO") — não
+// precisa ser uma transcrição exata. Comparação por palavra inteira, não por
+// caractere: "Gerente de Relacionamento I" não deve casar dentro de "Gerente de
+// Relacionamento II" só porque "I" é um substring de "II".
+function cargoMencionado(textoNorm: string, cargoNorm: string): boolean {
+  if (!textoNorm || !cargoNorm) return false;
+  const texto = textoNorm.split(" ");
+  const cargo = cargoNorm.split(" ");
+  for (let i = 0; i + cargo.length <= texto.length; i++) {
+    if (cargo.every((palavra, j) => texto[i + j] === palavra)) return true;
+  }
+  return false;
+}
 // retorna 1 se a Prioridade de interesse 1 bate com a cadeira, 2 se for a Prioridade 2, senão 0
-// Basta a cadeira ser mencionada em algum trecho do texto (ex.: "Diretor Executivo CEO"
-// cobre a cadeira "CEO") — não precisa ser uma transcrição exata do cargo.
 export function interestMatch(succession: SuccessionMap, person: Person, targetCargoNorm: string): 0 | 1 | 2 {
   const s = succession[person.id] || {};
-  if (targetCargoNorm && normCargo(s.prioridade1).includes(targetCargoNorm)) return 1;
-  if (targetCargoNorm && normCargo(s.prioridade2).includes(targetCargoNorm)) return 2;
+  if (targetCargoNorm && cargoMencionado(normCargo(s.prioridade1), targetCargoNorm)) return 1;
+  if (targetCargoNorm && cargoMencionado(normCargo(s.prioridade2), targetCargoNorm)) return 2;
   return 0;
 }
 // Match Indicação Líder: só pontua quando o líder (ocupante da cadeira) indicou nominalmente
