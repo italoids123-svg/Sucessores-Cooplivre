@@ -5,7 +5,7 @@ import ChairCard from "./ChairCard";
 import { useApp } from "@/lib/context";
 import { LEVEL_GROUPS, LEVEL_LABELS } from "@/lib/data";
 import { fmtDateTime } from "@/lib/format";
-import { successorsFor } from "@/lib/scoring";
+import { countChairBuckets } from "@/lib/scoring";
 
 export default function CityPage() {
   const { activePage, activeCity, closeCity, cityLevelFilter, toggleCityLevelFilter, chairs, hierMap, succession, people, baseUpdatedAt } =
@@ -28,15 +28,7 @@ export default function CityPage() {
   }, [cityChairs, cityLevelFilter, search]);
 
   const { pct2, pct1, pct0, bucket2, bucket1, bucket0 } = useMemo(() => {
-    let b2 = 0,
-      b1 = 0,
-      b0 = 0;
-    filtered.forEach((c) => {
-      const n = successorsFor(hierMap, succession, people, chairs, c).length;
-      if (n >= 2) b2++;
-      else if (n === 1) b1++;
-      else b0++;
-    });
+    const { b2, b1, b0 } = countChairBuckets(hierMap, succession, people, chairs, filtered);
     const total = filtered.length || 1;
     const p2 = Math.round((b2 / total) * 100);
     const p1 = Math.round((b1 / total) * 100);
@@ -94,19 +86,19 @@ export default function CityPage() {
             <div className="cl-item">
               <i className="seg-hi"></i>
               <span>
-                2 ou mais sucessores · {bucket2} ({pct2}%)
+                Saudável · {bucket2} ({pct2}%)
               </span>
             </div>
             <div className="cl-item">
               <i className="seg-mid"></i>
               <span>
-                1 sucessor · {bucket1} ({pct1}%)
+                Em atenção · {bucket1} ({pct1}%)
               </span>
             </div>
             <div className="cl-item">
               <i className="seg-low"></i>
               <span>
-                sem sucessor · {bucket0} ({pct0}%)
+                Crítica · {bucket0} ({pct0}%)
               </span>
             </div>
           </div>

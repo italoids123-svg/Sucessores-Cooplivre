@@ -4,8 +4,8 @@ import { useMemo } from "react";
 import { useApp } from "@/lib/context";
 import { LEVEL_GROUPS, LEVEL_LABELS } from "@/lib/data";
 import { fmtDateTime } from "@/lib/format";
-import { hasQuestionnaireData, successorsFor } from "@/lib/scoring";
-import type { Chair, PageKey } from "@/lib/types";
+import { countChairBuckets, hasQuestionnaireData } from "@/lib/scoring";
+import type { PageKey } from "@/lib/types";
 
 interface CoverageRow {
   key: string;
@@ -16,25 +16,6 @@ interface CoverageRow {
   bucket0: number;
   indice: number;
   onClick?: () => void;
-}
-
-function bucketChairs(
-  list: Chair[],
-  hierMap: Record<string, string[]>,
-  succession: ReturnType<typeof useApp>["succession"],
-  people: ReturnType<typeof useApp>["people"],
-  chairs: Chair[]
-) {
-  let b2 = 0,
-    b1 = 0,
-    b0 = 0;
-  list.forEach((c) => {
-    const n = successorsFor(hierMap, succession, people, chairs, c).length;
-    if (n >= 2) b2++;
-    else if (n === 1) b1++;
-    else b0++;
-  });
-  return { b2, b1, b0 };
 }
 
 function MiniBar({ pct2, pct1, pct0 }: { pct2: number; pct1: number; pct0: number }) {
@@ -113,7 +94,7 @@ export default function OverviewPage() {
   const { chairs, people, hierMap, succession, activePage, baseUpdatedAt, setActivePage } = useApp();
 
   const { pct2, pct1, pct0, bucket2, bucket1, bucket0 } = useMemo(() => {
-    const { b2, b1, b0 } = bucketChairs(chairs, hierMap, succession, people, chairs);
+    const { b2, b1, b0 } = countChairBuckets(hierMap, succession, people, chairs, chairs);
     const total = chairs.length || 1;
     const p2 = Math.round((b2 / total) * 100);
     const p1 = Math.round((b1 / total) * 100);
@@ -132,7 +113,7 @@ export default function OverviewPage() {
     return pageKeys.map((key) => {
       const niveis = LEVEL_GROUPS[key];
       const list = chairs.filter((c) => niveis.includes(c.nivel));
-      const { b2, b1, b0 } = bucketChairs(list, hierMap, succession, people, chairs);
+      const { b2, b1, b0 } = countChairBuckets(hierMap, succession, people, chairs, list);
       const total = list.length || 1;
       const indice = Math.round(((b2 * 100 + b1 * 50) / total));
       return { key, label: LEVEL_LABELS[key], total: list.length, bucket2: b2, bucket1: b1, bucket0: b0, indice, onClick: () => setActivePage(key) };
@@ -143,7 +124,7 @@ export default function OverviewPage() {
     const cargos = [...new Set(chairs.map((c) => c.cargo))].sort((a, b) => a.localeCompare(b, "pt-BR"));
     return cargos.map((cargo) => {
       const list = chairs.filter((c) => c.cargo === cargo);
-      const { b2, b1, b0 } = bucketChairs(list, hierMap, succession, people, chairs);
+      const { b2, b1, b0 } = countChairBuckets(hierMap, succession, people, chairs, list);
       const total = list.length || 1;
       const indice = Math.round(((b2 * 100 + b1 * 50) / total));
       return { key: cargo, label: cargo, total: list.length, bucket2: b2, bucket1: b1, bucket0: b0, indice };
@@ -219,19 +200,19 @@ export default function OverviewPage() {
           <div className="cl-item">
             <i className="seg-hi"></i>
             <span>
-              2 ou mais sucessores · {bucket2} ({pct2}%)
+              Saudável · {bucket2} ({pct2}%)
             </span>
           </div>
           <div className="cl-item">
             <i className="seg-mid"></i>
             <span>
-              1 sucessor · {bucket1} ({pct1}%)
+              Em atenção · {bucket1} ({pct1}%)
             </span>
           </div>
           <div className="cl-item">
             <i className="seg-low"></i>
             <span>
-              sem sucessor · {bucket0} ({pct0}%)
+              Crítica · {bucket0} ({pct0}%)
             </span>
           </div>
         </div>
@@ -248,8 +229,9 @@ export default function OverviewPage() {
       <h2 className="ov-subtitle">Cobertura por nível</h2>
       <CoverageTable rows={porNivel} nomeColuna="Nível" />
       <p className="ov-footnote">
-        Índice de cobertura: cada posição com 2 ou mais sucessores conta 100%, com 1 sucessor conta 50% e sem sucessor
-        conta 0%.
+        Índice de cobertura: cada posição saudável (2 ou mais sucessores) conta 100%, em atenção (1 sucessor, ou algum
+        interessado ainda não mapeado ou fora da hierarquia elegível) conta 50%, e crítica (nenhum interessado) conta
+        0%.
       </p>
 
       <h2 className="ov-subtitle">Cobertura por cargo</h2>

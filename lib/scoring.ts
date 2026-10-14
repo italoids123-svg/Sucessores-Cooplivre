@@ -88,10 +88,12 @@ function scorePersonBase(succession: SuccessionMap, personId: string) {
 }
 
 // retorna 1 se a Prioridade de interesse 1 bate com a cadeira, 2 se for a Prioridade 2, senão 0
+// Basta a cadeira ser mencionada em algum trecho do texto (ex.: "Diretor Executivo CEO"
+// cobre a cadeira "CEO") — não precisa ser uma transcrição exata do cargo.
 export function interestMatch(succession: SuccessionMap, person: Person, targetCargoNorm: string): 0 | 1 | 2 {
   const s = succession[person.id] || {};
-  if (targetCargoNorm && normCargo(s.prioridade1) === targetCargoNorm) return 1;
-  if (targetCargoNorm && normCargo(s.prioridade2) === targetCargoNorm) return 2;
+  if (targetCargoNorm && normCargo(s.prioridade1).includes(targetCargoNorm)) return 1;
+  if (targetCargoNorm && normCargo(s.prioridade2).includes(targetCargoNorm)) return 2;
   return 0;
 }
 // Match Indicação Líder: só pontua quando o líder (ocupante da cadeira) indicou nominalmente
@@ -220,6 +222,38 @@ export function outrosInteressadosFor(hierMap: Record<string, string[]>, success
       mobilidadeAlcancaCidade(localidadeAtualDe(succession, chairs, p), chair.cidade, (succession[p.id] || {}).mobilidade)
   );
   return sortByScoreDesc(succession, people, chair, list);
+}
+// Classificação visual da cadeira: saudável (2) = 2+ sucessores mapeados; em atenção
+// (1) = 1 sucessor mapeado, OU nenhum sucessor mas há algum interessado (ainda não
+// mapeado ou fora da hierarquia elegível); crítica (0) = nenhum interessado, de
+// nenhum tipo. Elegibilidade hierárquica e pontuação continuam aparecendo detalhadas
+// por seção (successorsFor/aindaNaoMapeadosFor/outrosInteressadosFor), mas deixam de
+// decidir sozinhas se a cadeira é crítica.
+export function chairStatusBucket(nSucc: number, naoMapeados: number, outros: number): 0 | 1 | 2 {
+  if (nSucc >= 2) return 2;
+  if (nSucc === 1) return 1;
+  return naoMapeados + outros > 0 ? 1 : 0;
+}
+export function countChairBuckets(
+  hierMap: Record<string, string[]>,
+  succession: SuccessionMap,
+  people: Person[],
+  chairs: Chair[],
+  list: Chair[]
+): { b2: number; b1: number; b0: number } {
+  let b2 = 0,
+    b1 = 0,
+    b0 = 0;
+  list.forEach((c) => {
+    const nSucc = successorsFor(hierMap, succession, people, chairs, c).length;
+    const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chairs, c).length;
+    const outros = outrosInteressadosFor(hierMap, succession, people, chairs, c).length;
+    const bucket = chairStatusBucket(nSucc, naoMapeados, outros);
+    if (bucket === 2) b2++;
+    else if (bucket === 1) b1++;
+    else b0++;
+  });
+  return { b2, b1, b0 };
 }
 export function nineBoxSubLabel(s: SuccessionRecord): string {
   const r26 = nbResolve(s.nineBox2026);

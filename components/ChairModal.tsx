@@ -4,7 +4,7 @@ import { useEffect } from "react";
 import CandidateCard, { type CandidateBucket } from "./CandidateCard";
 import { useApp } from "@/lib/context";
 import { CRITERIA } from "@/lib/criteria";
-import { aindaNaoMapeadosFor, occupantLabel, outrosInteressadosFor, successorsFor } from "@/lib/scoring";
+import { aindaNaoMapeadosFor, chairStatusBucket, occupantLabel, outrosInteressadosFor, successorsFor } from "@/lib/scoring";
 import type { Chair, Person } from "@/lib/types";
 
 function Section({
@@ -55,7 +55,8 @@ export default function ChairModal() {
   const successors = successorsFor(hierMap, succession, people, chairs, chair);
   const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chairs, chair);
   const outros = outrosInteressadosFor(hierMap, succession, people, chairs, chair);
-  const cls = successors.length >= 2 ? "st-hi" : successors.length === 1 ? "st-mid" : "st-low";
+  const bucket = chairStatusBucket(successors.length, naoMapeados.length, outros.length);
+  const cls = bucket === 2 ? "st-hi" : bucket === 1 ? "st-mid" : "st-low";
 
   return (
     <div

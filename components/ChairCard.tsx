@@ -2,7 +2,7 @@
 
 import { useApp } from "@/lib/context";
 import { CIDADE_RESULTADO_SEVERIDADE, isAgenciaCargo } from "@/lib/agency";
-import { aindaNaoMapeadosFor, occupantLabel, outrosInteressadosFor, successorsFor } from "@/lib/scoring";
+import { aindaNaoMapeadosFor, chairStatusBucket, occupantLabel, outrosInteressadosFor, successorsFor } from "@/lib/scoring";
 import type { Chair } from "@/lib/types";
 
 const SEVERIDADE_LABEL = { critico: "⚠ Crítico", atencao: "⚠ Atenção" } as const;
@@ -16,10 +16,11 @@ export default function ChairCard({ chair }: { chair: Chair }) {
 
   const nSucc = successorsFor(hierMap, succession, people, chairs, chair).length;
   const severidade = nSucc === 0 && isAgenciaCargo(chair.cargo) ? CIDADE_RESULTADO_SEVERIDADE[chair.cidade] : undefined;
-  const cls = nSucc >= 2 ? "st-hi" : nSucc === 1 ? "st-mid" : "st-low";
-  const statusLabel = nSucc >= 2 ? `${nSucc} sucessores` : nSucc === 1 ? "1 sucessor" : "Sem sucessor";
   const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chairs, chair).length;
   const outros = outrosInteressadosFor(hierMap, succession, people, chairs, chair).length;
+  const bucket = chairStatusBucket(nSucc, naoMapeados, outros);
+  const cls = bucket === 2 ? "st-hi" : bucket === 1 ? "st-mid" : "st-low";
+  const statusLabel = bucket === 2 ? `${nSucc} sucessores` : nSucc === 1 ? "1 sucessor" : bucket === 1 ? "Em atenção" : "Sem sucessor";
 
   let secondary: string;
   if (naoMapeados > 0) secondary = `${naoMapeados} ainda não mapeado${naoMapeados === 1 ? "" : "s"}`;
