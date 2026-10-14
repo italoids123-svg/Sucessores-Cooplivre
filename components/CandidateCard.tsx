@@ -26,6 +26,17 @@ export default function CandidateCard({ person, chair, bucket }: { person: Perso
   const band = aderenciaBand(sc.total);
   const nb2025 = nbResolve(s.nineBox2025);
   const nb2026 = nbResolve(s.nineBox2026);
+  // Quando os dois ciclos estão preenchidos, cada um pesa sua fração (37,5%/62,5%);
+  // com só um preenchido, ele vale 100% (mesma regra de scoreNineBox em lib/scoring.ts).
+  const bothNB = !!nb2025 && !!nb2026;
+  const nbWeightPct = (year: "2025" | "2026") =>
+    bothNB ? (year === "2025" ? CRITERIA.nineBox.weight2025 : CRITERIA.nineBox.weight2026) * 100 : 100;
+  const nineBoxLine = (resolved: typeof nb2025, year: "2025" | "2026") => {
+    if (!resolved) return "Não avaliado";
+    const weightPct = nbWeightPct(year);
+    const contrib = (resolved.points * weightPct) / 100;
+    return `${resolved.label} (${resolved.points} pts × ${fmtNum(weightPct)}% = ${fmtNum(contrib)} pts)`;
+  };
   const convBadge = s.conversaDesenvolvimento ? CONV_BADGE[s.conversaDesenvolvimento] : null;
   const contBadge = s.continuidade ? CONT_BADGE[s.continuidade] : null;
   const horizonteKey = sc.which === 1 ? s.horizonte1 : sc.which === 2 ? s.horizonte2 : null;
@@ -85,8 +96,8 @@ export default function CandidateCard({ person, chair, bucket }: { person: Perso
         <div className="cd-boxes">
           <div className="cd-box">
             <span className="cd-box-label">Nine Box</span>
-            <span className="cd-box-sub">2025: {nb2025 ? `${nb2025.label} (${nb2025.points} pts)` : "Não avaliado"}</span>
-            <span className="cd-box-sub">2026: {nb2026 ? `${nb2026.label} (${nb2026.points} pts)` : "Não avaliado"}</span>
+            <span className="cd-box-sub">2025: {nineBoxLine(nb2025, "2025")}</span>
+            <span className="cd-box-sub">2026: {nineBoxLine(nb2026, "2026")}</span>
             <b>{fmtNum(sc.nineBox)}/40</b>
           </div>
           <div className="cd-box">
