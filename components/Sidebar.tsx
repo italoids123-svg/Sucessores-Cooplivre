@@ -80,6 +80,16 @@ export default function Sidebar() {
         </button>
       </div>
       <div className="nav-group">
+        <div className="nav-group-title">Outros</div>
+        <button
+          className={`nav-btn${activePage === "outros" ? " active" : ""}`}
+          onClick={() => setActivePage("outros")}
+        >
+          <i></i>
+          Outros interesses
+        </button>
+      </div>
+      <div className="nav-group">
         <div className="nav-group-title">Metodologia</div>
         {METHOD_ITEMS.map((item) => (
           <button

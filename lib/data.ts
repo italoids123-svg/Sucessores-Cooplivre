@@ -4,7 +4,7 @@ import type { Chair, HierarquiaEntry, Person, PageKey } from "./types";
 // código) mudarem. A persistência no navegador (lib/persistence.ts) usa isso
 // para descartar uma base salva antiga e incompatível em vez de "prender" o
 // navegador numa versão anterior do painel para sempre.
-export const BASE_DATA_VERSION = 4;
+export const BASE_DATA_VERSION = 5;
 
 export const CHAIRS: Chair[] = [
   { id: "c001", nome: "Rafael Kerche de Oliveira", cargo: "CEO", nivel: "C-Level", diretoria: "Financeira", cidade: "Capivari", tempoCasa: 10.2, prefixLocalidade: false },
@@ -167,6 +167,30 @@ export const CHAIRS: Chair[] = [
   { id: "c158", nome: "Mauricio Toni Camargo", cargo: "Gerente de Relacionamento II", nivel: "Gerência", diretoria: "Negócios", cidade: "Salto", tempoCasa: 0, prefixLocalidade: true },
   { id: "c159", nome: "Ricardo Daniel Scovazza", cargo: "Gerente de Relacionamento II", nivel: "Gerência", diretoria: "Negócios", cidade: "Valinhos", tempoCasa: 0.2, prefixLocalidade: true },
   { id: "c160", nome: "Viviele Cristini da Silva Martins", cargo: "Gerente de Relacionamento II", nivel: "Gerência", diretoria: "Negócios", cidade: "Vinhedo", tempoCasa: 0.1, prefixLocalidade: true },
+  // Completa a trilha de carreira de Analista (Jr/Pl/Sr) em todos os cargos da família —
+  // cadeiras novas, sem ocupante na base de colaboradores, entram como vagas.
+  { id: "c161", nome: "", cargo: "Analista de Performance Corporativa Sr", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c162", nome: "", cargo: "Analista de Suprimentos Pl", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c163", nome: "", cargo: "Analista de Suprimentos Sr", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c164", nome: "", cargo: "Analista de Gestão de Pessoas Jr", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c165", nome: "", cargo: "Analista de Gestão de Pessoas Pl", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c166", nome: "", cargo: "Analista Operacional Pl", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c167", nome: "", cargo: "Analista Operacional Sr", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c168", nome: "", cargo: "Analista de Crédito Sr", nivel: "Analista", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c169", nome: "", cargo: "Analista de Tecnologia da Informação Jr", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c170", nome: "", cargo: "Analista de Tecnologia da Informação Pl", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c171", nome: "", cargo: "Analista de Sistemas Jr", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c172", nome: "", cargo: "Analista de Sistemas Sr", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c173", nome: "", cargo: "Analista Contábil Pl", nivel: "Analista", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c174", nome: "", cargo: "Analista de Riscos e Controles Pl", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c175", nome: "", cargo: "Analista de Administração de Pessoal Pl", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c176", nome: "", cargo: "Analista de Administração de Pessoal Sr", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c177", nome: "", cargo: "Analista de Agronegocios Pl", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c178", nome: "", cargo: "Analista de Agronegocios Sr", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c179", nome: "", cargo: "Analista de Recuperação de Crédito Pl", nivel: "Analista", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c180", nome: "", cargo: "Analista de Recuperação de Crédito Sr", nivel: "Analista", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c181", nome: "", cargo: "Analista de Comunicação e Marketing Pl", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c182", nome: "", cargo: "Analista de Comunicação e Marketing Sr", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
 ];
 
 export const PEOPLE: Person[] = [

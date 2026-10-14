@@ -92,7 +92,7 @@ function scorePersonBase(succession: SuccessionMap, personId: string) {
 // precisa ser uma transcrição exata. Comparação por palavra inteira, não por
 // caractere: "Gerente de Relacionamento I" não deve casar dentro de "Gerente de
 // Relacionamento II" só porque "I" é um substring de "II".
-function cargoMencionado(textoNorm: string, cargoNorm: string): boolean {
+export function cargoMencionado(textoNorm: string, cargoNorm: string): boolean {
   if (!textoNorm || !cargoNorm) return false;
   const texto = textoNorm.split(" ");
   const cargo = cargoNorm.split(" ");
@@ -101,11 +101,24 @@ function cargoMencionado(textoNorm: string, cargoNorm: string): boolean {
   }
   return false;
 }
+// "Gerente Executivo Comercial", sem o sufixo Regional 1/2, vale para qualquer uma das
+// duas cadeiras regionais — a distinção entre as duas deixou de ser critério de match.
+const GE_COMERCIAL_GENERICO = "gerente executivo comercial";
+export function cargoVariantes(cargoNorm: string): string[] {
+  if (cargoNorm === `${GE_COMERCIAL_GENERICO} regional 1` || cargoNorm === `${GE_COMERCIAL_GENERICO} regional 2`) {
+    return [cargoNorm, GE_COMERCIAL_GENERICO];
+  }
+  return [cargoNorm];
+}
 // retorna 1 se a Prioridade de interesse 1 bate com a cadeira, 2 se for a Prioridade 2, senão 0
 export function interestMatch(succession: SuccessionMap, person: Person, targetCargoNorm: string): 0 | 1 | 2 {
   const s = succession[person.id] || {};
-  if (targetCargoNorm && cargoMencionado(normCargo(s.prioridade1), targetCargoNorm)) return 1;
-  if (targetCargoNorm && cargoMencionado(normCargo(s.prioridade2), targetCargoNorm)) return 2;
+  if (!targetCargoNorm) return 0;
+  const variantes = cargoVariantes(targetCargoNorm);
+  const p1 = normCargo(s.prioridade1);
+  const p2 = normCargo(s.prioridade2);
+  if (variantes.some((v) => cargoMencionado(p1, v))) return 1;
+  if (variantes.some((v) => cargoMencionado(p2, v))) return 2;
   return 0;
 }
 // Match Indicação Líder: só pontua quando o líder (ocupante da cadeira) indicou nominalmente
@@ -234,6 +247,19 @@ export function outrosInteressadosFor(hierMap: Record<string, string[]>, success
       mobilidadeAlcancaCidade(localidadeAtualDe(succession, chairs, p), chair.cidade, (succession[p.id] || {}).mobilidade)
   );
   return sortByScoreDesc(succession, people, chair, list);
+}
+// Prioridade declarada (1 ou 2) que não corresponde a NENHUMA cadeira do mapa — a
+// pessoa quer uma posição que não existe (ou existe só sob outro nome/nível). Casa
+// direto com o texto dessa prioridade específica (mesmas variantes de interestMatch,
+// ex.: GE Comercial genérico) — não passa pelo interestMatch, que resolve qual
+// prioridade "vence" quando as duas apontam para a mesma cadeira e daria falso
+// negativo aqui quando prioridade1 e prioridade2 forem a mesma cadeira real.
+export function prioridadeSemCadeira(succession: SuccessionMap, chairs: Chair[], personId: string, qual: 1 | 2): boolean {
+  const s = succession[personId] || {};
+  const raw = qual === 1 ? s.prioridade1 : s.prioridade2;
+  if (!raw) return false;
+  const textoNorm = normCargo(raw);
+  return !chairs.some((c) => cargoVariantes(normCargo(c.cargo)).some((v) => cargoMencionado(textoNorm, v)));
 }
 // Classificação visual da cadeira, pela CONTAGEM TOTAL de interessados — sucessor
 // mapeado, ainda não mapeado ou fora da hierarquia elegível contam igual, sem
