@@ -32,11 +32,6 @@ export default function ChairCard({ chair }: { chair: Chair }) {
           : "Em atenção"
         : "Sem sucessor";
 
-  let secondary: string;
-  if (naoMapeados > 0) secondary = `${naoMapeados} ainda não mapeado${naoMapeados === 1 ? "" : "s"}`;
-  else if (outros > 0) secondary = `${outros} outro${outros === 1 ? "" : "s"} interesse${outros === 1 ? "" : "s"}`;
-  else secondary = "Nenhum outro interesse";
-
   return (
     <div
       className={`chair-card ${cls}`}
@@ -73,7 +68,11 @@ export default function ChairCard({ chair }: { chair: Chair }) {
       <div className="cc-divider"></div>
       <div className="cc-footer">
         <span className={`cc-status ${cls}`}>{statusLabel}</span>
-        <span className="cc-secondary">{secondary}</span>
+        <div className="cc-breakdown">
+          <span>{nSucc} dentro da pontuação</span>
+          <span>{naoMapeados} abaixo da pontuação</span>
+          <span>{outros} fora da hierarquia</span>
+        </div>
       </div>
     </div>
   );
