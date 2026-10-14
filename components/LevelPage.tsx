@@ -5,7 +5,7 @@ import ChairCard from "./ChairCard";
 import { useApp } from "@/lib/context";
 import { fmtDateTime } from "@/lib/format";
 import { LEVEL_GROUPS } from "@/lib/data";
-import { hasAnyData, successorsFor } from "@/lib/scoring";
+import { hasQuestionnaireData, successorsFor } from "@/lib/scoring";
 import type { PageKey } from "@/lib/types";
 
 const PAGE_META: Record<PageKey, { title: string; desc: string; searchPlaceholder: string; showDiretoriaFilter?: boolean }> = {
@@ -129,7 +129,7 @@ export default function LevelPage({ pageKey }: { pageKey: PageKey }) {
   const { pdiPct, respondentesCount, scopeCount } = useMemo(() => {
     const feederLevels = [...new Set(pageLevels.flatMap((l) => hierMap[l] || []))];
     const scopePeople = people.filter((p) => pageLevels.includes(p.nivel) || feederLevels.includes(p.nivel));
-    const respondentes = scopePeople.filter((p) => hasAnyData(succession, p.id));
+    const respondentes = scopePeople.filter((p) => hasQuestionnaireData(succession, p.id));
     const comPlanoAtivo = respondentes.filter((p) => (succession[p.id] || {}).conversaDesenvolvimento === "andamento");
     const pct = scopePeople.length ? Math.round((comPlanoAtivo.length / scopePeople.length) * 100) : 0;
     return { pdiPct: pct, respondentesCount: respondentes.length, scopeCount: scopePeople.length };

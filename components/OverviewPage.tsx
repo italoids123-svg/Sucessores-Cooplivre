@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useApp } from "@/lib/context";
 import { LEVEL_GROUPS, LEVEL_LABELS } from "@/lib/data";
 import { fmtDateTime } from "@/lib/format";
-import { hasAnyData, successorsFor } from "@/lib/scoring";
+import { hasQuestionnaireData, successorsFor } from "@/lib/scoring";
 import type { Chair, PageKey } from "@/lib/types";
 
 interface CoverageRow {
@@ -122,7 +122,7 @@ export default function OverviewPage() {
   }, [chairs, hierMap, succession, people]);
 
   const { respondentes, totalPeople, pctRespondido } = useMemo(() => {
-    const respondentesCount = people.filter((p) => hasAnyData(succession, p.id)).length;
+    const respondentesCount = people.filter((p) => hasQuestionnaireData(succession, p.id)).length;
     const total = people.length;
     return { respondentes: respondentesCount, totalPeople: total, pctRespondido: total ? Math.round((respondentesCount / total) * 100) : 0 };
   }, [people, succession]);

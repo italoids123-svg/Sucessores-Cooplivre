@@ -139,6 +139,29 @@ export function hasAnyData(succession: SuccessionMap, personId: string): boolean
     return v !== "" && v !== null && v !== undefined && v !== false;
   });
 }
+// Campos preenchidos pelo questionário de interesse — exclui Nine Box, Favorabilidade
+// e "Lidera equipe", que vêm de uma fonte separada (avaliação de desempenho/GPTW) e
+// podem existir sem a pessoa nunca ter respondido o questionário de interesse.
+const QUESTIONNAIRE_FIELDS: (keyof SuccessionMap[string])[] = [
+  "prioridade1",
+  "horizonte1",
+  "desenvolvimento1",
+  "prioridade2",
+  "horizonte2",
+  "desenvolvimento2",
+  "localidadeAtual",
+  "mobilidade",
+  "conversaDesenvolvimento",
+  "continuidade",
+  "possivelSucessorTexto",
+];
+export function hasQuestionnaireData(succession: SuccessionMap, personId: string): boolean {
+  const s = succession[personId] || {};
+  return QUESTIONNAIRE_FIELDS.some((k) => {
+    const v = s[k];
+    return v !== "" && v !== null && v !== undefined && v !== false;
+  });
+}
 export function aderenciaBand(total: number): { label: string; cls: string } {
   if (total >= 80) return { label: "Pronto / alta aderência", cls: "hi" };
   if (total >= CRITERIA.eligibilityThreshold) return { label: "Em desenvolvimento / média", cls: "mid" };
