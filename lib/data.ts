@@ -4,19 +4,20 @@ import type { Chair, HierarquiaEntry, Person, PageKey } from "./types";
 // código) mudarem. A persistência no navegador (lib/persistence.ts) usa isso
 // para descartar uma base salva antiga e incompatível em vez de "prender" o
 // navegador numa versão anterior do painel para sempre.
-export const BASE_DATA_VERSION = 6;
+export const BASE_DATA_VERSION = 7;
 
 export const CHAIRS: Chair[] = [
   { id: "c001", nome: "Rafael Kerche de Oliveira", cargo: "CEO", nivel: "C-Level", diretoria: "Financeira", cidade: "Capivari", tempoCasa: 10.2, prefixLocalidade: false },
-  { id: "c002", nome: "Joao Angelo de Moraes", cargo: "Diretor Administrativo", nivel: "Diretoria", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: 2.6, prefixLocalidade: false },
+  { id: "c002", nome: "Joao Angelo de Moraes", cargo: "Diretor Administrativo/Financeiro", nivel: "Diretoria", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: 2.6, prefixLocalidade: false },
   { id: "c003", nome: "Domingos Savio Oriente Franciulli", cargo: "Diretor de Negócios", nivel: "Diretoria", diretoria: "Negócios", cidade: "Capivari", tempoCasa: 0.1, prefixLocalidade: false },
   { id: "c004", nome: "Cleber Eduardo Vitorino", cargo: "Gerente Executivo de Riscos e Conformidade", nivel: "Gerência Executiva", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: 2.0, prefixLocalidade: false },
-  { id: "c005", nome: "Silvanira Squiapatti da Silva Lanconi", cargo: "Gerente Executivo Administrativo", nivel: "Gerência Executiva", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: 3.2, prefixLocalidade: false },
+  { id: "c005", nome: "Silvanira Squiapatti da Silva Lanconi", cargo: "Gerente Executivo de Estratégia e Pessoas", nivel: "Gerência Executiva", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: 3.2, prefixLocalidade: false },
   { id: "c006", nome: "Amaya Fernanda Dal Coleto de Albuquerque", cargo: "Gerente Executivo Financeiro", nivel: "Gerência Executiva", diretoria: "Financeira", cidade: "Capivari", tempoCasa: 16.3, prefixLocalidade: false },
   { id: "c007", nome: "", cargo: "Gerente Executivo de Negócios", nivel: "Gerência Executiva", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
   { id: "c008", nome: "Nelson Alves Quagliato", cargo: "Gerente Executivo Comercial Regional 2", nivel: "Gerência Executiva", diretoria: "Negócios", cidade: "Capivari", tempoCasa: 10.4, prefixLocalidade: false },
   { id: "c009", nome: "Rafael Cavallante de Oliveira", cargo: "Gerente Executivo Comercial Regional 1", nivel: "Gerência Executiva", diretoria: "Negócios", cidade: "Capivari", tempoCasa: 13.9, prefixLocalidade: false },
-  { id: "c010", nome: "Matheus Ferreira", cargo: "Gerente de T.i.", nivel: "Gerência", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: 7.5, prefixLocalidade: false },
+  { id: "c010", nome: "", cargo: "Coordenador de Tecnologia da Informação", nivel: "Coordenação", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c183", nome: "Matheus Ferreira", cargo: "Gerente Executivo Administrativo", nivel: "Gerência Executiva", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: 7.5, prefixLocalidade: false },
   { id: "c012", nome: "Luis Guilherme Apolinario", cargo: "Gerente Financeiro", nivel: "Gerência", diretoria: "Financeira", cidade: "Capivari", tempoCasa: 10.7, prefixLocalidade: false },
   { id: "c013", nome: "Luiz Tiago Correa Moretti", cargo: "Gerente de Operações", nivel: "Gerência", diretoria: "Financeira", cidade: "Capivari", tempoCasa: 4.1, prefixLocalidade: false },
   { id: "c014", nome: "Milene Barratella", cargo: "Gerente de Operações", nivel: "Gerência", diretoria: "Financeira", cidade: "Capivari", tempoCasa: 10.1, prefixLocalidade: false },
@@ -187,18 +188,36 @@ export const CHAIRS: Chair[] = [
   { id: "c180", nome: "", cargo: "Analista de Recuperação de Crédito Sr", nivel: "Analista", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
   { id: "c181", nome: "", cargo: "Analista de Comunicação e Marketing Pl", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
   { id: "c182", nome: "", cargo: "Analista de Comunicação e Marketing Sr", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  // Posições que ainda não tinham cadeira no mapa (apareciam só como "outros interesses"),
+  // adicionadas como vaga única por cargo — sem dado de ocupante, quantidade real de vagas,
+  // cidade ou nível/diretoria confirmados além do que o próprio nome do cargo indica.
+  { id: "c184", nome: "", cargo: "Advogado", nivel: "Especialista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c185", nome: "", cargo: "Agente de Relacionamento", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c186", nome: "", cargo: "Assistente de Agronegócios", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c187", nome: "", cargo: "Assistente de Gestão de Pessoas", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c188", nome: "", cargo: "Assistente de Produtos e Serviços", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c189", nome: "", cargo: "Assistente de Suprimentos", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c190", nome: "", cargo: "Coordenador de Crédito", nivel: "Coordenação", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c191", nome: "", cargo: "Coordenador de Gestão de Pessoas", nivel: "Coordenação", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c192", nome: "", cargo: "Coordenador de Produtos e Serviços", nivel: "Coordenação", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c193", nome: "", cargo: "Coordenador de Riscos e Controles", nivel: "Coordenação", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c194", nome: "", cargo: "Coordenador Operacional", nivel: "Coordenação", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c195", nome: "", cargo: "Especialista de Gestão de Pessoas", nivel: "Especialista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c196", nome: "", cargo: "Especialista de Recuperação de Crédito", nivel: "Especialista", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c197", nome: "", cargo: "Especialista Financeiro", nivel: "Especialista", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c198", nome: "", cargo: "Gerente de P.A. Digital", nivel: "Gerência", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
 ];
 
 export const PEOPLE: Person[] = [
   { id: "P001", nome: "Rafael Kerche de Oliveira", nivel: "C-Level", cargo: "CEO", diretoria: "Financeira", chairId: "c001" },
-  { id: "P002", nome: "Joao Angelo de Moraes", nivel: "Diretoria", cargo: "Diretor Administrativo", diretoria: "Administrativa", chairId: "c002" },
+  { id: "P002", nome: "Joao Angelo de Moraes", nivel: "Diretoria", cargo: "Diretor Administrativo/Financeiro", diretoria: "Administrativa", chairId: "c002" },
   { id: "P003", nome: "Domingos Savio Oriente Franciulli", nivel: "Diretoria", cargo: "Diretor de Negócios", diretoria: "Negócios", chairId: "c003" },
   { id: "P004", nome: "Cleber Eduardo Vitorino", nivel: "Gerência Executiva", cargo: "Gerente Executivo de Riscos e Conformidade", diretoria: "Administrativa", chairId: "c004" },
-  { id: "P005", nome: "Silvanira Squiapatti da Silva Lanconi", nivel: "Gerência Executiva", cargo: "Gerente Executivo Administrativo", diretoria: "Administrativa", chairId: "c005" },
+  { id: "P005", nome: "Silvanira Squiapatti da Silva Lanconi", nivel: "Gerência Executiva", cargo: "Gerente Executivo de Estratégia e Pessoas", diretoria: "Administrativa", chairId: "c005" },
   { id: "P006", nome: "Amaya Fernanda Dal Coleto de Albuquerque", nivel: "Gerência Executiva", cargo: "Gerente Executivo Financeiro", diretoria: "Financeira", chairId: "c006" },
   { id: "P008", nome: "Nelson Alves Quagliato", nivel: "Gerência Executiva", cargo: "Gerente Executivo Comercial Regional 2", diretoria: "Negócios", chairId: "c008" },
   { id: "P009", nome: "Rafael Cavallante de Oliveira", nivel: "Gerência Executiva", cargo: "Gerente Executivo Comercial Regional 1", diretoria: "Negócios", chairId: "c009" },
-  { id: "P010", nome: "Matheus Ferreira", nivel: "Gerência", cargo: "Gerente de T.i.", diretoria: "Administrativa", chairId: "c010" },
+  { id: "P010", nome: "Matheus Ferreira", nivel: "Gerência Executiva", cargo: "Gerente Executivo Administrativo", diretoria: "Administrativa", chairId: "c183" },
   { id: "P012", nome: "Luis Guilherme Apolinario", nivel: "Gerência", cargo: "Gerente Financeiro", diretoria: "Financeira", chairId: "c012" },
   { id: "P013", nome: "Luiz Tiago Correa Moretti", nivel: "Gerência", cargo: "Gerente de Operações", diretoria: "Financeira", chairId: "c013" },
   { id: "P014", nome: "Milene Barratella", nivel: "Gerência", cargo: "Gerente de Operações", diretoria: "Financeira", chairId: "c014" },

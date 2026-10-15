@@ -101,26 +101,29 @@ export function cargoMencionado(textoNorm: string, cargoNorm: string): boolean {
   }
   return false;
 }
-// "Gerente Executivo Comercial", sem o sufixo Regional 1/2, vale para qualquer uma das
-// duas cadeiras regionais — a distinção entre as duas deixou de ser critério de match.
-const GE_COMERCIAL_GENERICO = "gerente executivo comercial";
-// Readequações de nomenclatura ainda não efetivadas na cadeira: quem já declarou interesse
-// usando o nome futuro da posição deve contar como interessado na cadeira atual (mesmo cargo,
-// mesmo nível), sem que a cadeira em si seja renomeada/reclassificada.
-const CARGO_ALIASES_FUTURAS: Record<string, string> = {
-  "gerente de t.i.": "coordenador de tecnologia da informacao",
-  "gerente financeiro": "coordenador financeiro",
-  "gerente de operacoes": "especialista de operacoes",
-  "gerente de performance corporativa": "coordenador de performance corporativa",
+// Cada cadeira pode ter variantes de texto adicionais que também contam como manifestação de
+// interesse nela, indexadas pelo cargo (normalizado) da cadeira de destino: readequações de
+// nomenclatura ainda não efetivadas (a cadeira continua com o cargo/nível atuais), sinônimos ou
+// erros de digitação que o RH confirmou se referirem à mesma posição, ou uma cadeira que cobre
+// mais de uma vaga quase idêntica (ex.: as duas Regionais de Gerente Executivo Comercial).
+const CARGO_VARIANTES_EXTRA: Record<string, string[]> = {
+  "gerente executivo comercial regional 1": ["gerente executivo comercial", "superintendente regional"],
+  "gerente executivo comercial regional 2": ["gerente executivo comercial", "superintendente regional"],
+  "gerente financeiro": ["coordenador financeiro"],
+  "gerente de operacoes": ["especialista de operacoes"],
+  "gerente de performance corporativa": ["coordenador de performance corporativa", "coordenador de bi"],
+  "diretor administrativo/financeiro": ["diretor administrativo", "diretor financeiro"],
+  advogado: ["advogada"],
+  "agente de relacionamento": ["assistente de gerente"],
+  "especialista de produtos e servicos": ["assessor de investimento", "especialista de investimentos"],
+  "especialista em supervisao e monitoramento": ["especialista/coordenador de auditoria interna"],
+  "coordenador de comunicacao e marketing": ["gerente de marketing"],
+  "gerente executivo de negocios": ["gerente executivo de agronegocios"],
+  "coordenador de produtos e servicos": ["gerente dos produtos consignados, cambio etc."],
 };
 export function cargoVariantes(cargoNorm: string): string[] {
-  if (cargoNorm === `${GE_COMERCIAL_GENERICO} regional 1` || cargoNorm === `${GE_COMERCIAL_GENERICO} regional 2`) {
-    return [cargoNorm, GE_COMERCIAL_GENERICO];
-  }
-  if (CARGO_ALIASES_FUTURAS[cargoNorm]) {
-    return [cargoNorm, CARGO_ALIASES_FUTURAS[cargoNorm]];
-  }
-  return [cargoNorm];
+  const extra = CARGO_VARIANTES_EXTRA[cargoNorm];
+  return extra ? [cargoNorm, ...extra] : [cargoNorm];
 }
 // retorna 1 se a Prioridade de interesse 1 bate com a cadeira, 2 se for a Prioridade 2, senão 0
 export function interestMatch(succession: SuccessionMap, person: Person, targetCargoNorm: string): 0 | 1 | 2 {
@@ -273,18 +276,16 @@ export function prioridadeSemCadeira(succession: SuccessionMap, chairs: Chair[],
   const textoNorm = normCargo(raw);
   return !chairs.some((c) => cargoVariantes(normCargo(c.cargo)).some((v) => cargoMencionado(textoNorm, v)));
 }
-// Classificação visual da cadeira, pela CONTAGEM TOTAL de interessados — sucessor
-// mapeado, ainda não mapeado ou fora da hierarquia elegível contam igual, sem
-// distinção de pontuação ou elegibilidade hierárquica: saudável (2) = 2 ou mais
-// interessados no total; em atenção (1) = exatamente 1 interessado; crítica (0) =
-// nenhum interessado, de nenhum tipo. Elegibilidade hierárquica e pontuação
-// continuam aparecendo detalhadas por seção (successorsFor/aindaNaoMapeadosFor/
-// outrosInteressadosFor), mas não decidem mais essa classificação.
+// Classificação visual da cadeira:
+// saudável (2) = 2+ sucessores mapeados (elegíveis na hierarquia E dentro do corte de
+// aderência); em atenção (1) = 1 sucessor mapeado, OU nenhum sucessor mas há algum
+// interessado (ainda não mapeado ou fora da hierarquia elegível); crítica (0) = nenhum
+// interessado, de nenhum tipo. Critérios de elegibilidade hierárquica e de corte de
+// pontuação voltam a decidir a classificação — volume de interesse por si só não basta.
 export function chairStatusBucket(nSucc: number, naoMapeados: number, outros: number): 0 | 1 | 2 {
-  const total = nSucc + naoMapeados + outros;
-  if (total >= 2) return 2;
-  if (total === 1) return 1;
-  return 0;
+  if (nSucc >= 2) return 2;
+  if (nSucc === 1) return 1;
+  return naoMapeados + outros > 0 ? 1 : 0;
 }
 export function countChairBuckets(
   hierMap: Record<string, string[]>,

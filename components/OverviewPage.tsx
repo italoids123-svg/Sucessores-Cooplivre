@@ -229,9 +229,9 @@ export default function OverviewPage() {
       <h2 className="ov-subtitle">Cobertura por nível</h2>
       <CoverageTable rows={porNivel} nomeColuna="Nível" />
       <p className="ov-footnote">
-        Índice de cobertura: cada posição saudável (2 ou mais interessados no total — sucessor mapeado, ainda não
-        mapeado ou fora da hierarquia elegível) conta 100%, em atenção (exatamente 1 interessado) conta 50%, e crítica
-        (nenhum interessado) conta 0%.
+        Índice de cobertura: cada posição saudável (2 ou mais sucessores) conta 100%, em atenção (1 sucessor, ou algum
+        interessado ainda não mapeado ou fora da hierarquia elegível) conta 50%, e crítica (nenhum interessado) conta
+        0%.
       </p>
 
       <h2 className="ov-subtitle">Cobertura por cargo</h2>

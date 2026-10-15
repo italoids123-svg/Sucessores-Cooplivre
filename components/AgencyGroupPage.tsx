@@ -25,7 +25,7 @@ const META: Record<"uad" | "agencias", GroupMeta> = {
   agencias: {
     pageKey: "agencias",
     title: "Agências",
-    desc: "Posições de agência — Gerentes de P.A., Gerentes de Relacionamento e Coordenadores Administrativos de P.A., nas unidades de atendimento ao cooperado.",
+    desc: "Posições de agência — Gerentes de P.A., Gerentes e Agentes de Relacionamento e Coordenadores Administrativos de P.A., nas unidades de atendimento ao cooperado.",
     searchPlaceholder: "Buscar por nome, cargo ou cidade…",
   },
 };
