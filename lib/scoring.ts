@@ -104,9 +104,21 @@ export function cargoMencionado(textoNorm: string, cargoNorm: string): boolean {
 // "Gerente Executivo Comercial", sem o sufixo Regional 1/2, vale para qualquer uma das
 // duas cadeiras regionais — a distinção entre as duas deixou de ser critério de match.
 const GE_COMERCIAL_GENERICO = "gerente executivo comercial";
+// Readequações de nomenclatura ainda não efetivadas na cadeira: quem já declarou interesse
+// usando o nome futuro da posição deve contar como interessado na cadeira atual (mesmo cargo,
+// mesmo nível), sem que a cadeira em si seja renomeada/reclassificada.
+const CARGO_ALIASES_FUTURAS: Record<string, string> = {
+  "gerente de t.i.": "coordenador de tecnologia da informacao",
+  "gerente financeiro": "coordenador financeiro",
+  "gerente de operacoes": "especialista de operacoes",
+  "gerente de performance corporativa": "coordenador de performance corporativa",
+};
 export function cargoVariantes(cargoNorm: string): string[] {
   if (cargoNorm === `${GE_COMERCIAL_GENERICO} regional 1` || cargoNorm === `${GE_COMERCIAL_GENERICO} regional 2`) {
     return [cargoNorm, GE_COMERCIAL_GENERICO];
+  }
+  if (CARGO_ALIASES_FUTURAS[cargoNorm]) {
+    return [cargoNorm, CARGO_ALIASES_FUTURAS[cargoNorm]];
   }
   return [cargoNorm];
 }
