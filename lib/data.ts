@@ -4,7 +4,7 @@ import type { Chair, HierarquiaEntry, Person, PageKey } from "./types";
 // código) mudarem. A persistência no navegador (lib/persistence.ts) usa isso
 // para descartar uma base salva antiga e incompatível em vez de "prender" o
 // navegador numa versão anterior do painel para sempre.
-export const BASE_DATA_VERSION = 7;
+export const BASE_DATA_VERSION = 8;
 
 export const CHAIRS: Chair[] = [
   { id: "c001", nome: "Rafael Kerche de Oliveira", cargo: "CEO", nivel: "C-Level", diretoria: "Financeira", cidade: "Capivari", tempoCasa: 10.2, prefixLocalidade: false },
@@ -190,13 +190,15 @@ export const CHAIRS: Chair[] = [
   { id: "c182", nome: "", cargo: "Analista de Comunicação e Marketing Sr", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
   // Posições que ainda não tinham cadeira no mapa (apareciam só como "outros interesses"),
   // adicionadas como vaga única por cargo — sem dado de ocupante, quantidade real de vagas,
-  // cidade ou nível/diretoria confirmados além do que o próprio nome do cargo indica.
-  { id: "c184", nome: "", cargo: "Advogado", nivel: "Especialista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  // cidade ou nível/diretoria confirmados além do que o próprio nome do cargo indica. Advogado
+  // e os quatro Assistentes usam o nível "Apoio" — mesmo grupo (fora da régua hierárquica) de
+  // Recepcionista/Motorista e demais posições de apoio que só entram via upload da base real.
+  { id: "c184", nome: "", cargo: "Advogado", nivel: "Apoio", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
   { id: "c185", nome: "", cargo: "Agente de Relacionamento", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
-  { id: "c186", nome: "", cargo: "Assistente de Agronegócios", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
-  { id: "c187", nome: "", cargo: "Assistente de Gestão de Pessoas", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
-  { id: "c188", nome: "", cargo: "Assistente de Produtos e Serviços", nivel: "Analista", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
-  { id: "c189", nome: "", cargo: "Assistente de Suprimentos", nivel: "Analista", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c186", nome: "", cargo: "Assistente de Agronegócios", nivel: "Apoio", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c187", nome: "", cargo: "Assistente de Gestão de Pessoas", nivel: "Apoio", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c188", nome: "", cargo: "Assistente de Produtos e Serviços", nivel: "Apoio", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
+  { id: "c189", nome: "", cargo: "Assistente de Suprimentos", nivel: "Apoio", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
   { id: "c190", nome: "", cargo: "Coordenador de Crédito", nivel: "Coordenação", diretoria: "Financeira", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
   { id: "c191", nome: "", cargo: "Coordenador de Gestão de Pessoas", nivel: "Coordenação", diretoria: "Administrativa", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
   { id: "c192", nome: "", cargo: "Coordenador de Produtos e Serviços", nivel: "Coordenação", diretoria: "Negócios", cidade: "Capivari", tempoCasa: null, prefixLocalidade: false, vago: true },
@@ -367,6 +369,7 @@ export const LEVEL_GROUPS: Record<PageKey, string[]> = {
   coordenacao: ["Coordenação"],
   analista: ["Analista"],
   especialista: ["Especialista"],
+  apoio: ["Apoio"],
 };
 
 export const LEVEL_LABELS: Record<PageKey, string> = {
@@ -376,4 +379,5 @@ export const LEVEL_LABELS: Record<PageKey, string> = {
   coordenacao: "Coordenação",
   especialista: "Especialista",
   analista: "Analista",
+  apoio: "Outras posições",
 };

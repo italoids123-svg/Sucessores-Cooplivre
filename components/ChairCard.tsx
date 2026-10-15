@@ -18,9 +18,9 @@ export default function ChairCard({ chair }: { chair: Chair }) {
   const severidade = nSucc === 0 && isAgenciaCargo(chair.cargo) ? CIDADE_RESULTADO_SEVERIDADE[chair.cidade] : undefined;
   const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chairs, chair).length;
   const outros = outrosInteressadosFor(hierMap, succession, people, chairs, chair).length;
-  const bucket = chairStatusBucket(nSucc, naoMapeados, outros);
+  const bucket = chairStatusBucket(nSucc);
   const cls = bucket === 2 ? "st-hi" : bucket === 1 ? "st-mid" : "st-low";
-  const statusLabel = bucket === 2 ? `${nSucc} sucessores` : nSucc === 1 ? "1 sucessor" : bucket === 1 ? "Em atenção" : "Sem sucessor";
+  const statusLabel = bucket === 2 ? `${nSucc} sucessores` : bucket === 1 ? "1 sucessor" : "Sem sucessor";
 
   return (
     <div

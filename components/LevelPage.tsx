@@ -44,6 +44,12 @@ const PAGE_META: Record<PageKey, { title: string; desc: string; searchPlaceholde
     searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
     showDiretoriaFilter: true,
   },
+  apoio: {
+    title: "Outras posições",
+    desc: "Advogados, assistentes e demais posições de apoio — fora da régua de elegibilidade hierárquica.",
+    searchPlaceholder: "Buscar por nome, cargo ou diretoria…",
+    showDiretoriaFilter: true,
+  },
 };
 
 // Grupo de gerência inferido a partir do cargo — não existe campo dedicado nos

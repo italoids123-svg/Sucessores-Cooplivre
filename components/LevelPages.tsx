@@ -16,6 +16,7 @@ export default function LevelPages() {
       <LevelPage key={`coordenacao-${dataVersion}`} pageKey="coordenacao" />
       <LevelPage key={`especialista-${dataVersion}`} pageKey="especialista" />
       <LevelPage key={`analista-${dataVersion}`} pageKey="analista" />
+      <LevelPage key={`apoio-${dataVersion}`} pageKey="apoio" />
     </>
   );
 }

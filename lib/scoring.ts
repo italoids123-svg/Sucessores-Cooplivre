@@ -276,16 +276,15 @@ export function prioridadeSemCadeira(succession: SuccessionMap, chairs: Chair[],
   const textoNorm = normCargo(raw);
   return !chairs.some((c) => cargoVariantes(normCargo(c.cargo)).some((v) => cargoMencionado(textoNorm, v)));
 }
-// Classificação visual da cadeira:
-// saudável (2) = 2+ sucessores mapeados (elegíveis na hierarquia E dentro do corte de
-// aderência); em atenção (1) = 1 sucessor mapeado, OU nenhum sucessor mas há algum
-// interessado (ainda não mapeado ou fora da hierarquia elegível); crítica (0) = nenhum
-// interessado, de nenhum tipo. Critérios de elegibilidade hierárquica e de corte de
-// pontuação voltam a decidir a classificação — volume de interesse por si só não basta.
-export function chairStatusBucket(nSucc: number, naoMapeados: number, outros: number): 0 | 1 | 2 {
+// Classificação visual da cadeira, só pelos sucessores de fato elegíveis (dentro da
+// hierarquia E do corte de aderência): saudável (2) = 2+ sucessores; em atenção (1) =
+// exatamente 1 sucessor; crítica (0) = nenhum sucessor — mesmo que existam pessoas
+// "ainda não mapeadas" (abaixo do corte) ou "fora da hierarquia" interessadas, essas
+// não bastam para tirar a cadeira de crítica: só contam como detalhamento à parte.
+export function chairStatusBucket(nSucc: number): 0 | 1 | 2 {
   if (nSucc >= 2) return 2;
   if (nSucc === 1) return 1;
-  return naoMapeados + outros > 0 ? 1 : 0;
+  return 0;
 }
 export function countChairBuckets(
   hierMap: Record<string, string[]>,
@@ -299,9 +298,7 @@ export function countChairBuckets(
     b0 = 0;
   list.forEach((c) => {
     const nSucc = successorsFor(hierMap, succession, people, chairs, c).length;
-    const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chairs, c).length;
-    const outros = outrosInteressadosFor(hierMap, succession, people, chairs, c).length;
-    const bucket = chairStatusBucket(nSucc, naoMapeados, outros);
+    const bucket = chairStatusBucket(nSucc);
     if (bucket === 2) b2++;
     else if (bucket === 1) b1++;
     else b0++;

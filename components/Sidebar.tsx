@@ -11,6 +11,7 @@ const MAP_ITEMS: { key: PageKey; label: string }[] = [
   { key: "coordenacao", label: LEVEL_LABELS.coordenacao },
   { key: "especialista", label: LEVEL_LABELS.especialista },
   { key: "analista", label: LEVEL_LABELS.analista },
+  { key: "apoio", label: LEVEL_LABELS.apoio },
 ];
 
 const UNIDADE_ITEMS: { key: Extract<NavPage, "uad" | "agencias">; label: string }[] = [
