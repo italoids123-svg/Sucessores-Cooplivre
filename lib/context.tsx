@@ -4,6 +4,7 @@ import { createContext, useCallback, useContext, useEffect, useMemo, useState } 
 import { CHAIRS as INITIAL_CHAIRS, HIERARQUIA, PEOPLE as INITIAL_PEOPLE } from "./data";
 import { clearPersistedState, loadPersistedState, savePersistedState } from "./persistence";
 import { buildHierMap } from "./scoring";
+import { SUCCESSION_SEED } from "./succession-seed";
 import type { Chair, NavPage, PageKey, Person, SuccessionMap } from "./types";
 import { downloadWorkbook, parseUploadedWorkbook } from "./workbook";
 
@@ -46,7 +47,7 @@ const AppContext = createContext<AppContextValue | null>(null);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const [chairs, setChairs] = useState<Chair[]>(INITIAL_CHAIRS);
   const [people, setPeople] = useState<Person[]>(INITIAL_PEOPLE);
-  const [succession, setSuccession] = useState<SuccessionMap>({});
+  const [succession, setSuccession] = useState<SuccessionMap>(SUCCESSION_SEED);
   const [dataVersion, setDataVersion] = useState(0);
   const [baseUpdatedAt, setBaseUpdatedAt] = useState<Date | null>(null);
 
@@ -137,10 +138,10 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     clearPersistedState();
     setChairs(INITIAL_CHAIRS);
     setPeople(INITIAL_PEOPLE);
-    setSuccession({});
+    setSuccession(SUCCESSION_SEED);
     setDataVersion((v) => v + 1);
     setBaseUpdatedAt(new Date());
-    showNotice("Base salva neste navegador foi apagada — voltou ao ponto de partida (sem dados de sucessão).");
+    showNotice("Base salva neste navegador foi apagada — voltou ao ponto de partida (base padrão do dashboard).");
   }, [showNotice]);
 
   const value: AppContextValue = {
