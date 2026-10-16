@@ -66,7 +66,7 @@ export const CRITERIA = {
       { key: "qualquer", label: "Qualquer unidade", points: 20 },
     ] as KeyedScaleItem[],
   },
-  eligibilityThreshold: 60,
+  eligibilityThreshold: 50,
 };
 
 export const QSTEPS = [
