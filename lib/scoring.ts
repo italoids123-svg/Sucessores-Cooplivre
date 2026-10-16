@@ -1,3 +1,4 @@
+import { isAgenciaCargo } from "./agency";
 import { CRITERIA } from "./criteria";
 import { mobilidadeAlcancaCidade } from "./geo";
 import type { Chair, ChairScore, HierarquiaEntry, Person, SuccessionMap, SuccessionRecord } from "./types";
@@ -326,4 +327,68 @@ export function occupantLabel(chair: Chair): string | null {
   if (chair.vago) return null;
   if (chair.prefixLocalidade && chair.cidade) return `${chair.nome} · ${chair.cidade}`;
   return chair.nome;
+}
+
+export type GrupoUnidade = "uad" | "agencias";
+export type CrossBucket = "dentro" | "abaixo" | "fora";
+export interface CrossInterestRow {
+  key: string;
+  person: Person;
+  chair: Chair;
+  score: ChairScore;
+  bucket: CrossBucket;
+  grupoAtual: GrupoUnidade;
+  grupoDestino: GrupoUnidade;
+}
+// Interesses cruzados entre UAD e Agências: pessoas cujo cargo atual está num grupo
+// (UAD ou Agência, mesma regra de isAgenciaCargo usada nas páginas de unidade) mas
+// que declararam interesse (Prioridade 1 ou 2) numa cadeira real do OUTRO grupo.
+// Reaproveita successorsFor/aindaNaoMapeadosFor/outrosInteressadosFor — os mesmos
+// buckets e regras de elegibilidade já usados em cada cadeira — percorrendo cadeira
+// por cadeira (não o texto declarado direto) para lidar corretamente com mobilidade.
+// Um mesmo cargo pode existir em dezenas de cidades (ex.: "Gerente de P.A."), e quem
+// declarou o cargo sem citar uma cidade bate com todas elas igualmente — por isso o
+// resultado é deduplicado por pessoa + cargo de destino, mantendo só a ocorrência mais
+// favorável (melhor bucket e, dentro dele, maior pontuação) em vez de uma linha por cidade.
+const BUCKET_RANK: Record<CrossBucket, number> = { dentro: 2, abaixo: 1, fora: 0 };
+export function interessesCruzadosUadAgencia(
+  hierMap: Record<string, string[]>,
+  succession: SuccessionMap,
+  people: Person[],
+  chairs: Chair[]
+): CrossInterestRow[] {
+  const porPessoaECargo = new Map<string, CrossInterestRow>();
+  const consider = (row: CrossInterestRow) => {
+    const dedupeKey = `${row.person.id}:${normCargo(row.chair.cargo)}`;
+    const atual = porPessoaECargo.get(dedupeKey);
+    if (
+      !atual ||
+      BUCKET_RANK[row.bucket] > BUCKET_RANK[atual.bucket] ||
+      (BUCKET_RANK[row.bucket] === BUCKET_RANK[atual.bucket] && row.score.total > atual.score.total)
+    ) {
+      porPessoaECargo.set(dedupeKey, row);
+    }
+  };
+  chairs.forEach((chair) => {
+    const grupoDestino: GrupoUnidade = isAgenciaCargo(chair.cargo) ? "agencias" : "uad";
+    const add = (list: Person[], bucket: CrossBucket) => {
+      list.forEach((p) => {
+        const grupoAtual: GrupoUnidade = isAgenciaCargo(p.cargo) ? "agencias" : "uad";
+        if (grupoAtual === grupoDestino) return;
+        consider({
+          key: `${p.id}:${chair.id}`,
+          person: p,
+          chair,
+          score: scoreForChair(succession, people, p.id, chair),
+          bucket,
+          grupoAtual,
+          grupoDestino,
+        });
+      });
+    };
+    add(successorsFor(hierMap, succession, people, chairs, chair), "dentro");
+    add(aindaNaoMapeadosFor(hierMap, succession, people, chairs, chair), "abaixo");
+    add(outrosInteressadosFor(hierMap, succession, people, chairs, chair), "fora");
+  });
+  return [...porPessoaECargo.values()].sort((a, b) => b.score.total - a.score.total);
 }
