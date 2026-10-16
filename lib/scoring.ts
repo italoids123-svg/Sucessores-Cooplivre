@@ -225,23 +225,44 @@ function localidadeAtualDe(succession: SuccessionMap, chairs: Chair[], person: P
   const chairAtual = chairs.find((c) => c.id === person.chairId);
   return chairAtual ? chairAtual.cidade : null;
 }
-// Para certos cargos, o pool elegível inclui também um nível lateral (mesmo tier
-// hierárquico do próprio cargo), além do pool normal que a Hierarquia define vindo de
-// baixo — ex.: Gerente de P.A. aceita qualquer Gerência (inclusive Gerente de
-// Relacionamento I e II, de outras agências ou de áreas administrativas) como
-// candidato lateral, não só quem vem de Coordenação/Especialista. Chave: cargo da
-// cadeira normalizado.
+// Gerente de Relacionamento (I, II, Digital) é uma trilha à parte dentro do nível
+// Gerência — aberta a QUALQUER posição do mapa (ver feederPoolFor), então nunca conta
+// como "Gerência" genérica para fins de elegibilidade normal por tier.
+export function ehGerenteDeRelacionamento(cargo: string): boolean {
+  return normCargo(cargo).startsWith("gerente de relacionamento");
+}
+// O campo "nivel" bruto dos dados é grosso demais para a régua de elegibilidade:
+// Analista se divide em Jr/Pl/Sr pelo sufixo do cargo (sobe só um degrau por vez), e
+// Gerente de Relacionamento vira seu próprio tier (ver acima). Para todo o resto, o
+// tier é o próprio nível.
+export function tierDeElegibilidade(nivel: string, cargo: string): string {
+  if (nivel === "Analista") {
+    const c = normCargo(cargo);
+    if (/\bsr$/.test(c)) return "Analista Sr";
+    if (/\bpl$/.test(c)) return "Analista Pl";
+    if (/\bjr$/.test(c)) return "Analista Jr";
+    return nivel;
+  }
+  if (nivel === "Gerência" && ehGerenteDeRelacionamento(cargo)) return "Gerente de Relacionamento";
+  return nivel;
+}
+// Para certos cargos, o pool elegível inclui também um nível lateral (mesmo tier da
+// própria cadeira), além do pool normal que a Hierarquia define vindo de baixo — ex.:
+// Gerente de P.A. aceita qualquer Gerência (de outras agências ou de áreas
+// administrativas) como candidato lateral, não só quem vem de Coordenação/Especialista.
+// Chave: cargo da cadeira normalizado.
 const FEEDER_NIVEL_EXTRA: Record<string, string[]> = {
   "gerente de p.a.": ["Gerência"],
 };
 export function feederPoolFor(hierMap: Record<string, string[]>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
-  const feederLevels = [...(hierMap[chair.nivel] || []), ...(FEEDER_NIVEL_EXTRA[normCargo(chair.cargo)] || [])];
-  if (!feederLevels.length) return [];
-  return people.filter(
-    (p) =>
-      feederLevels.includes(p.nivel) &&
-      mobilidadeAlcancaCidade(localidadeAtualDe(succession, chairs, p), chair.cidade, (succession[p.id] || {}).mobilidade)
-  );
+  const chairTier = tierDeElegibilidade(chair.nivel, chair.cargo);
+  const feederLevels = [...(hierMap[chairTier] || []), ...(FEEDER_NIVEL_EXTRA[normCargo(chair.cargo)] || [])];
+  return people.filter((p) => {
+    if (!mobilidadeAlcancaCidade(localidadeAtualDe(succession, chairs, p), chair.cidade, (succession[p.id] || {}).mobilidade)) return false;
+    // Gerente de Relacionamento é aberto a qualquer posição do mapa, sem restrição de tier.
+    if (ehGerenteDeRelacionamento(p.cargo)) return true;
+    return feederLevels.length > 0 && feederLevels.includes(tierDeElegibilidade(p.nivel, p.cargo));
+  });
 }
 // Ordena por aderência (score total para a cadeira), da maior para a menor.
 function sortByScoreDesc(succession: SuccessionMap, people: Person[], chair: Chair, candidates: Person[]): Person[] {

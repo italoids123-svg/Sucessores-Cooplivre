@@ -154,6 +154,11 @@ export default function EligibilityPage() {
             alcance da mobilidade declarada a partir da sua localidade atual, tiver declarado essa posição como
             Prioridade de interesse 1 ou 2, e atingir {threshold} pontos ou mais no total.
           </div>
+          <div style={{ fontSize: "11px", color: "var(--muted)" }}>
+            Dentro de Analista, o nível elegível sobe um degrau por vez (Jr → Pl → Sr), pelo sufixo do cargo. Gerente
+            de Relacionamento (I, II, Digital) é uma trilha à parte — exceção à régua acima: é candidato elegível
+            para qualquer posição do mapa, de ponta a ponta, sempre sujeito à mobilidade.
+          </div>
         </div>
       </div>
 

@@ -400,14 +400,23 @@ export const PEOPLE: Person[] = [
   { id: "P212", nome: "Rebecca Daria Barbosa de Souza", nivel: "Atendimento", cargo: "Agente de Atendimento", diretoria: "", chairId: null },
 ];
 
+// "nivel" aqui é o tier de elegibilidade (lib/scoring.ts: tierDeElegibilidade), mais
+// fino que o campo nivel bruto das pessoas/cadeiras: Analista se divide em Jr/Pl/Sr, e
+// Gerente de Relacionamento (dentro de Gerência) nem aparece aqui — é aberto a
+// qualquer posição do mapa, tratado à parte em feederPoolFor, por isso nunca conta
+// como "Gerência" genérica (ex.: Gerência Executiva só recebe de Gerência regular).
 export const HIERARQUIA: HierarquiaEntry[] = [
   { nivel: "C-Level", elegivel: "Diretoria" },
   { nivel: "Diretoria", elegivel: "Gerência Executiva" },
   { nivel: "Gerência Executiva", elegivel: "Gerência" },
   { nivel: "Gerência", elegivel: "Coordenação" },
   { nivel: "Gerência", elegivel: "Especialista" },
-  { nivel: "Coordenação", elegivel: "Analista" },
-  { nivel: "Especialista", elegivel: "Analista" },
+  { nivel: "Coordenação", elegivel: "Analista Sr" },
+  { nivel: "Coordenação", elegivel: "Especialista" },
+  { nivel: "Especialista", elegivel: "Analista Sr" },
+  { nivel: "Especialista", elegivel: "Coordenação" },
+  { nivel: "Analista Sr", elegivel: "Analista Pl" },
+  { nivel: "Analista Pl", elegivel: "Analista Jr" },
 ];
 
 export const LEVEL_GROUPS: Record<PageKey, string[]> = {
