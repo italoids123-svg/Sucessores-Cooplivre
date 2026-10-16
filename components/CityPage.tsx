@@ -86,7 +86,7 @@ export default function CityPage() {
             <div className="cl-item">
               <i className="seg-hi"></i>
               <span>
-                Saudável · {bucket2} ({pct2}%)
+                Estável · {bucket2} ({pct2}%)
               </span>
             </div>
             <div className="cl-item">

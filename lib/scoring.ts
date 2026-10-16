@@ -225,9 +225,18 @@ function localidadeAtualDe(succession: SuccessionMap, chairs: Chair[], person: P
   const chairAtual = chairs.find((c) => c.id === person.chairId);
   return chairAtual ? chairAtual.cidade : null;
 }
+// Para certos cargos, o pool elegível inclui também um nível lateral (mesmo tier
+// hierárquico do próprio cargo), além do pool normal que a Hierarquia define vindo de
+// baixo — ex.: Gerente de P.A. aceita qualquer Gerência (inclusive Gerente de
+// Relacionamento I e II, de outras agências ou de áreas administrativas) como
+// candidato lateral, não só quem vem de Coordenação/Especialista. Chave: cargo da
+// cadeira normalizado.
+const FEEDER_NIVEL_EXTRA: Record<string, string[]> = {
+  "gerente de p.a.": ["Gerência"],
+};
 export function feederPoolFor(hierMap: Record<string, string[]>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
-  const feederLevels = hierMap[chair.nivel];
-  if (!feederLevels || !feederLevels.length) return [];
+  const feederLevels = [...(hierMap[chair.nivel] || []), ...(FEEDER_NIVEL_EXTRA[normCargo(chair.cargo)] || [])];
+  if (!feederLevels.length) return [];
   return people.filter(
     (p) =>
       feederLevels.includes(p.nivel) &&
@@ -289,15 +298,26 @@ export function prioridadeSemCadeira(succession: SuccessionMap, chairs: Chair[],
 export function cadeiraVirtual(cargo: string): Chair {
   return { id: `virtual:${cargo}`, nome: "", cargo, nivel: "", diretoria: "", cidade: "", tempoCasa: null, prefixLocalidade: false, vago: true };
 }
-// Classificação visual da cadeira, só pelos sucessores de fato elegíveis (dentro da
-// hierarquia E do corte de aderência): saudável (2) = 2+ sucessores; em atenção (1) =
-// exatamente 1 sucessor; crítica (0) = nenhum sucessor — mesmo que existam pessoas
-// "ainda não mapeadas" (abaixo do corte) ou "fora da hierarquia" interessadas, essas
-// não bastam para tirar a cadeira de crítica: só contam como detalhamento à parte.
-export function chairStatusBucket(nSucc: number): 0 | 1 | 2 {
-  if (nSucc >= 2) return 2;
-  if (nSucc === 1) return 1;
-  return 0;
+// Classificação visual da cadeira: estável (2) = 1 ou mais sucessores de fato
+// elegíveis (dentro da hierarquia E do corte de aderência); em atenção (1) = nenhum
+// sucessor elegível, mas existe ao menos um interessado fora da hierarquia elegível
+// cuja pontuação (mesma fórmula de score, calculada normalmente) já atinge o corte de
+// aderência — a pessoa pontua bem, só não está no nível/mobilidade que a Hierarquia
+// exige; crítica (0) = nenhum sucessor e nenhum interessado fora da hierarquia pontua
+// o suficiente — "ainda não mapeados" (dentro da hierarquia, mas abaixo do corte)
+// nunca tiram uma cadeira de crítica, só contam como detalhamento à parte.
+export function chairStatusBucket(
+  succession: SuccessionMap,
+  people: Person[],
+  chair: Chair,
+  successors: Person[],
+  outrosInteressados: Person[]
+): 0 | 1 | 2 {
+  if (successors.length >= 1) return 2;
+  const temForaAcimaDoCorte = outrosInteressados.some(
+    (p) => scoreForChair(succession, people, p.id, chair).total >= CRITERIA.eligibilityThreshold
+  );
+  return temForaAcimaDoCorte ? 1 : 0;
 }
 export function countChairBuckets(
   hierMap: Record<string, string[]>,
@@ -310,8 +330,9 @@ export function countChairBuckets(
     b1 = 0,
     b0 = 0;
   list.forEach((c) => {
-    const nSucc = successorsFor(hierMap, succession, people, chairs, c).length;
-    const bucket = chairStatusBucket(nSucc);
+    const successors = successorsFor(hierMap, succession, people, chairs, c);
+    const outros = outrosInteressadosFor(hierMap, succession, people, chairs, c);
+    const bucket = chairStatusBucket(succession, people, c, successors, outros);
     if (bucket === 2) b2++;
     else if (bucket === 1) b1++;
     else b0++;

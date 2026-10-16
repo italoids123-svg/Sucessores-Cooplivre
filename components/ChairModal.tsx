@@ -55,7 +55,7 @@ export default function ChairModal() {
   const successors = successorsFor(hierMap, succession, people, chairs, chair);
   const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chairs, chair);
   const outros = outrosInteressadosFor(hierMap, succession, people, chairs, chair);
-  const bucket = chairStatusBucket(successors.length);
+  const bucket = chairStatusBucket(succession, people, chair, successors, outros);
   const cls = bucket === 2 ? "st-hi" : bucket === 1 ? "st-mid" : "st-low";
 
   return (

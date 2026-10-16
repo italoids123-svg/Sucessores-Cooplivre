@@ -14,13 +14,15 @@ const SEVERIDADE_TITLE = {
 export default function ChairCard({ chair }: { chair: Chair }) {
   const { chairs, hierMap, succession, people, openModal } = useApp();
 
-  const nSucc = successorsFor(hierMap, succession, people, chairs, chair).length;
+  const successors = successorsFor(hierMap, succession, people, chairs, chair);
+  const nSucc = successors.length;
   const severidade = nSucc === 0 && isAgenciaCargo(chair.cargo) ? CIDADE_RESULTADO_SEVERIDADE[chair.cidade] : undefined;
   const naoMapeados = aindaNaoMapeadosFor(hierMap, succession, people, chairs, chair).length;
-  const outros = outrosInteressadosFor(hierMap, succession, people, chairs, chair).length;
-  const bucket = chairStatusBucket(nSucc);
+  const outrosList = outrosInteressadosFor(hierMap, succession, people, chairs, chair);
+  const outros = outrosList.length;
+  const bucket = chairStatusBucket(succession, people, chair, successors, outrosList);
   const cls = bucket === 2 ? "st-hi" : bucket === 1 ? "st-mid" : "st-low";
-  const statusLabel = bucket === 2 ? `${nSucc} sucessores` : bucket === 1 ? "1 sucessor" : "Sem sucessor";
+  const statusLabel = bucket === 2 ? `${nSucc} sucessor${nSucc > 1 ? "es" : ""}` : bucket === 1 ? "Sucessor fora da hierarquia" : "Sem sucessor";
 
   return (
     <div

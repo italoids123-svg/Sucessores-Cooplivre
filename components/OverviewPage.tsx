@@ -43,9 +43,9 @@ function CoverageTable({ rows, nomeColuna }: { rows: CoverageRow[]; nomeColuna: 
             <th>Posições</th>
             <th>Cobertura</th>
             <th>Índice de cobertura</th>
-            <th>2 ou mais</th>
-            <th>1</th>
-            <th>0</th>
+            <th>Estável</th>
+            <th>Em atenção</th>
+            <th>Crítica</th>
           </tr>
         </thead>
         <tbody>
@@ -154,14 +154,14 @@ export default function OverviewPage() {
           <div className="kpi-sub">{people.length} pessoas na base</div>
         </div>
         <div className="kpi">
-          <div className="kpi-label">Saudáveis</div>
+          <div className="kpi-label">Estáveis</div>
           <div className="kpi-value v-hi">{bucket2}</div>
-          <div className="kpi-sub">2 ou mais sucessores</div>
+          <div className="kpi-sub">1 ou mais sucessores</div>
         </div>
         <div className="kpi">
           <div className="kpi-label">Em atenção</div>
           <div className="kpi-value v-mid">{bucket1}</div>
-          <div className="kpi-sub">1 sucessor</div>
+          <div className="kpi-sub">sucessor só fora da hierarquia</div>
         </div>
         <div className="kpi">
           <div className="kpi-label">Críticas</div>
@@ -200,7 +200,7 @@ export default function OverviewPage() {
           <div className="cl-item">
             <i className="seg-hi"></i>
             <span>
-              Saudável · {bucket2} ({pct2}%)
+              Estável · {bucket2} ({pct2}%)
             </span>
           </div>
           <div className="cl-item">
@@ -229,9 +229,10 @@ export default function OverviewPage() {
       <h2 className="ov-subtitle">Cobertura por nível</h2>
       <CoverageTable rows={porNivel} nomeColuna="Nível" />
       <p className="ov-footnote">
-        Índice de cobertura: cada posição saudável (2 ou mais sucessores dentro do corte de aderência) conta 100%, em
-        atenção (exatamente 1 sucessor) conta 50%, e crítica (nenhum sucessor — mesmo havendo interessados ainda não
-        mapeados ou fora da hierarquia elegível) conta 0%.
+        Índice de cobertura: cada posição estável (1 ou mais sucessores dentro do corte de aderência) conta 100%, em
+        atenção (nenhum sucessor dentro da hierarquia elegível, mas com interessado fora dela pontuando acima do
+        corte) conta 50%, e crítica (nenhum sucessor e nenhum interessado fora da hierarquia acima do corte — mesmo
+        havendo interessados ainda não mapeados abaixo do corte) conta 0%.
       </p>
 
       <h2 className="ov-subtitle">Cobertura por cargo</h2>
