@@ -33,8 +33,8 @@ export default function Dashboard() {
           <QuestionnairePage />
           <MapPage />
           <CityPage />
-          <OtherInterestsPage />
           <ConselhoPage />
+          <OtherInterestsPage />
         </main>
       </div>
       <ChairModal />
