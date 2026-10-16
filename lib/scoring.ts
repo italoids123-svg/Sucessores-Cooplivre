@@ -278,6 +278,7 @@ export function prioridadeSemCadeira(succession: SuccessionMap, chairs: Chair[],
   const raw = qual === 1 ? s.prioridade1 : s.prioridade2;
   if (!raw) return false;
   const textoNorm = normCargo(raw);
+  if (/^nao tenho interesse/.test(textoNorm)) return false; // opção "sem segunda posição", não é uma posição declarada
   return !chairs.some((c) => cargoVariantes(normCargo(c.cargo)).some((v) => cargoMencionado(textoNorm, v)));
 }
 // Cadeira "virtual": uma posição declarada no questionário que não corresponde a
