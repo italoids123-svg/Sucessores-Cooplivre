@@ -4,7 +4,7 @@ import type { Chair, HierarquiaEntry, Person, PageKey } from "./types";
 // código) mudarem. A persistência no navegador (lib/persistence.ts) usa isso
 // para descartar uma base salva antiga e incompatível em vez de "prender" o
 // navegador numa versão anterior do painel para sempre.
-export const BASE_DATA_VERSION = 8;
+export const BASE_DATA_VERSION = 9;
 
 export const CHAIRS: Chair[] = [
   { id: "c001", nome: "Rafael Kerche de Oliveira", cargo: "CEO", nivel: "C-Level", diretoria: "Financeira", cidade: "Capivari", tempoCasa: 10.2, prefixLocalidade: false },

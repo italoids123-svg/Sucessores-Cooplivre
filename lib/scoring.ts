@@ -112,6 +112,7 @@ const CARGO_VARIANTES_EXTRA: Record<string, string[]> = {
   "gerente financeiro": ["coordenador financeiro"],
   "gerente de operacoes": ["especialista de operacoes"],
   "gerente de performance corporativa": ["coordenador de performance corporativa", "coordenador de bi"],
+  "coordenador de tecnologia da informacao": ["gerente de t.i."],
   "diretor administrativo/financeiro": ["diretor administrativo", "diretor financeiro"],
   advogado: ["advogada"],
   "agente de relacionamento": ["assistente de gerente"],

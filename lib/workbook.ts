@@ -1,7 +1,7 @@
 import * as XLSX from "xlsx";
 import { CONT_LABELS, CONV_LABELS, CRITERIA } from "./criteria";
 import { CIDADES_CONHECIDAS } from "./geo";
-import { INT_MAP, MOB_MAP, nbResolve, normCargo, normName } from "./scoring";
+import { cargoVariantes, INT_MAP, MOB_MAP, nbResolve, normCargo, normName } from "./scoring";
 import type { Chair, Person, SuccessionMap, SuccessionRecord } from "./types";
 
 const NB_REF_LINES = CRITERIA.nineBox.scale.map((x) => `${x.label} — ${x.sub} — ${x.points} pts`);
@@ -136,7 +136,10 @@ export async function parseUploadedWorkbook(file: File, chairsIn: Chair[], peopl
     let cadeirasNovas = 0;
     if (wbIn.SheetNames.includes("Cadeiras")) {
       const cadeirasJson = XLSX.utils.sheet_to_json<Record<string, unknown>>(wbIn.Sheets["Cadeiras"], { defval: "" });
-      const cargosExistentes = new Set(chairs.map((c) => normCargo(c.cargo)));
+      // Inclui também os aliases de cada cadeira (nomes antigos de readequações, sinônimos) —
+      // sem isso, reenviar uma planilha baixada antes de um reajuste de nomenclatura recriaria
+      // a cadeira sob o nome velho, duplicando o ocupante numa cadeira "fantasma".
+      const cargosExistentes = new Set(chairs.flatMap((c) => cargoVariantes(normCargo(c.cargo))));
       let chairIdCounter = chairs.length + 1;
       const usedChairIds = new Set(chairs.map((c) => c.id));
       cadeirasJson.forEach((row) => {
