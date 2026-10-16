@@ -17,7 +17,17 @@ const BAND_SHORT_LABEL: Record<string, string> = {
   low: "Baixa aderência",
 };
 
-export default function CandidateCard({ person, chair, bucket }: { person: Person; chair: Chair; bucket: CandidateBucket }) {
+export default function CandidateCard({
+  person,
+  chair,
+  bucket,
+  interestCargo,
+}: {
+  person: Person;
+  chair: Chair;
+  bucket: CandidateBucket;
+  interestCargo?: string;
+}) {
   const { succession, people } = useApp();
   const [open, setOpen] = useState(false);
 
@@ -66,6 +76,7 @@ export default function CandidateCard({ person, chair, bucket }: { person: Perso
           <div className="cand-sub">
             {person.cargo} · {person.nivel}
           </div>
+          {interestCargo ? <div className="cand-interest">Interesse: {interestCargo}</div> : null}
         </div>
         <div className="cand-row-prio">
           {sc.which ? (

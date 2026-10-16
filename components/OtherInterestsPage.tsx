@@ -65,7 +65,13 @@ export default function OtherInterestsPage() {
 
       <div className="modal-sections" style={{ padding: 0, maxHeight: "none" }}>
         {filtered.map((r) => (
-          <CandidateCard key={r.key} person={people.find((p) => p.id === r.personId)!} chair={cadeiraVirtual(r.declarado)} bucket="fora" />
+          <CandidateCard
+            key={r.key}
+            person={people.find((p) => p.id === r.personId)!}
+            chair={cadeiraVirtual(r.declarado)}
+            bucket="fora"
+            interestCargo={r.declarado}
+          />
         ))}
         {filtered.length === 0 ? <div className="modal-empty">Nenhuma manifestação encontrada.</div> : null}
       </div>
