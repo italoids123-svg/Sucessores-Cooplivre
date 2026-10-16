@@ -156,8 +156,9 @@ export default function EligibilityPage() {
           </div>
           <div style={{ fontSize: "11px", color: "var(--muted)" }}>
             Dentro de Analista, o nível elegível sobe um degrau por vez (Jr → Pl → Sr), pelo sufixo do cargo. Gerente
-            de Relacionamento (I, II, Digital) é uma trilha à parte — exceção à régua acima: é candidato elegível
-            para qualquer posição do mapa, de ponta a ponta, sempre sujeito à mobilidade.
+            de Relacionamento (I, II, Digital) tem sua própria cadeira anterior (Atendimento) e, além disso, é uma
+            exceção à régua acima quando avaliado como candidato: é elegível para qualquer posição do mapa, de ponta
+            a ponta, sempre sujeito à mobilidade.
           </div>
         </div>
       </div>

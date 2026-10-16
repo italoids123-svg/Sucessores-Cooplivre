@@ -402,15 +402,18 @@ export const PEOPLE: Person[] = [
 
 // "nivel" aqui é o tier de elegibilidade (lib/scoring.ts: tierDeElegibilidade), mais
 // fino que o campo nivel bruto das pessoas/cadeiras: Analista se divide em Jr/Pl/Sr, e
-// Gerente de Relacionamento (dentro de Gerência) nem aparece aqui — é aberto a
-// qualquer posição do mapa, tratado à parte em feederPoolFor, por isso nunca conta
-// como "Gerência" genérica (ex.: Gerência Executiva só recebe de Gerência regular).
+// Gerente de Relacionamento (dentro de Gerência) é uma trilha à parte — tem sua
+// própria cadeira anterior (Atendimento: Agente de Atendimento/de Relacionamento) E,
+// como candidato, é aberto a qualquer posição do mapa (tratado à parte em
+// feederPoolFor), por isso nunca conta como "Gerência" genérica (ex.: Gerência
+// Executiva só recebe de Gerência regular).
 export const HIERARQUIA: HierarquiaEntry[] = [
   { nivel: "C-Level", elegivel: "Diretoria" },
   { nivel: "Diretoria", elegivel: "Gerência Executiva" },
   { nivel: "Gerência Executiva", elegivel: "Gerência" },
   { nivel: "Gerência", elegivel: "Coordenação" },
   { nivel: "Gerência", elegivel: "Especialista" },
+  { nivel: "Gerente de Relacionamento", elegivel: "Atendimento" },
   { nivel: "Coordenação", elegivel: "Analista Sr" },
   { nivel: "Coordenação", elegivel: "Especialista" },
   { nivel: "Especialista", elegivel: "Analista Sr" },
