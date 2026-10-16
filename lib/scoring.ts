@@ -252,16 +252,15 @@ export function aindaNaoMapeadosFor(hierMap: Record<string, string[]>, successio
   return sortByScoreDesc(succession, people, chair, list);
 }
 // Outros interessados: declararam interesse nessa posição, mas não estão no nível elegível —
-// mesmo assim, só contam para ESTA cadeira se a posição estiver ao alcance da mobilidade declarada.
+// mesmo que a mobilidade declarada não alcance a cidade da cadeira — a mobilidade segue
+// contando pontos no score e aparecendo no card da pessoa, mas não esconde quem declarou
+// uma posição real: sem isso, a pessoa some de qualquer grupo da cadeira E de "Outros
+// interesses" (que só lista prioridade sem cadeira correspondente), ficando invisível em
+// qualquer lugar do app mesmo tendo declarado interesse validamente.
 export function outrosInteressadosFor(hierMap: Record<string, string[]>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
   const targetCargo = normCargo(chair.cargo);
   const feederIds = new Set(feederPoolFor(hierMap, succession, people, chairs, chair).map((p) => p.id));
-  const list = people.filter(
-    (p) =>
-      !feederIds.has(p.id) &&
-      interestMatch(succession, p, targetCargo) > 0 &&
-      mobilidadeAlcancaCidade(localidadeAtualDe(succession, chairs, p), chair.cidade, (succession[p.id] || {}).mobilidade)
-  );
+  const list = people.filter((p) => !feederIds.has(p.id) && interestMatch(succession, p, targetCargo) > 0);
   return sortByScoreDesc(succession, people, chair, list);
 }
 // Prioridade declarada (1 ou 2) que não corresponde a NENHUMA cadeira do mapa — a
