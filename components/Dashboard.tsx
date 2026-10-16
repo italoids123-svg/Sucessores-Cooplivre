@@ -3,6 +3,7 @@
 import AgencyGroupPage from "./AgencyGroupPage";
 import ChairModal from "./ChairModal";
 import CityPage from "./CityPage";
+import ConselhoPage from "./ConselhoPage";
 import CriteriaPage from "./CriteriaPage";
 import EligibilityPage from "./EligibilityPage";
 import LevelPages from "./LevelPages";
@@ -33,6 +34,7 @@ export default function Dashboard() {
           <MapPage />
           <CityPage />
           <OtherInterestsPage />
+          <ConselhoPage />
         </main>
       </div>
       <ChairModal />

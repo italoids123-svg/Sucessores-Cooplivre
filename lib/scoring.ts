@@ -91,11 +91,15 @@ function scorePersonBase(succession: SuccessionMap, personId: string) {
 // em algum trecho do texto (ex.: "Diretor Executivo CEO" cobre a cadeira "CEO") — não
 // precisa ser uma transcrição exata. Comparação por palavra inteira, não por
 // caractere: "Gerente de Relacionamento I" não deve casar dentro de "Gerente de
-// Relacionamento II" só porque "I" é um substring de "II".
+// Relacionamento II" só porque "I" é um substring de "II". Ignora um ponto final em
+// cada palavra (pontuação de fim de frase na resposta, ex.: "Agente de
+// Relacionamento.") — aplicado aos dois lados, então não afeta abreviações como
+// "P.A." (o ponto do meio continua fazendo parte da palavra).
 export function cargoMencionado(textoNorm: string, cargoNorm: string): boolean {
   if (!textoNorm || !cargoNorm) return false;
-  const texto = textoNorm.split(" ");
-  const cargo = cargoNorm.split(" ");
+  const semPontoFinal = (p: string) => p.replace(/\.$/, "");
+  const texto = textoNorm.split(" ").map(semPontoFinal);
+  const cargo = cargoNorm.split(" ").map(semPontoFinal);
   for (let i = 0; i + cargo.length <= texto.length; i++) {
     if (cargo.every((palavra, j) => texto[i + j] === palavra)) return true;
   }
@@ -275,6 +279,13 @@ export function prioridadeSemCadeira(succession: SuccessionMap, chairs: Chair[],
   if (!raw) return false;
   const textoNorm = normCargo(raw);
   return !chairs.some((c) => cargoVariantes(normCargo(c.cargo)).some((v) => cargoMencionado(textoNorm, v)));
+}
+// Cadeira "virtual": uma posição declarada no questionário que não corresponde a
+// nenhuma cadeira real do mapa (Outros interesses, Conselho). Usada só para calcular
+// a pontuação/card da pessoa com scoreForChair/CandidateCard — sem ocupante, nível ou
+// diretoria reais, então matchLider sempre dá 0 e a pessoa é sempre "fora da hierarquia".
+export function cadeiraVirtual(cargo: string): Chair {
+  return { id: `virtual:${cargo}`, nome: "", cargo, nivel: "", diretoria: "", cidade: "", tempoCasa: null, prefixLocalidade: false, vago: true };
 }
 // Classificação visual da cadeira, só pelos sucessores de fato elegíveis (dentro da
 // hierarquia E do corte de aderência): saudável (2) = 2+ sucessores; em atenção (1) =

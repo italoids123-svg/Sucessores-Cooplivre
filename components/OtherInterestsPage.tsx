@@ -1,17 +1,18 @@
 "use client";
 
 import { useMemo, useState } from "react";
+import CandidateCard from "./CandidateCard";
 import { useApp } from "@/lib/context";
-import { prioridadeSemCadeira } from "@/lib/scoring";
+import { cadeiraVirtual, prioridadeSemCadeira } from "@/lib/scoring";
 
 interface Row {
   key: string;
+  personId: string;
   nome: string;
-  nivel: string;
-  cargoAtual: string;
-  qual: 1 | 2;
   declarado: string;
 }
+
+const EH_CONSELHO = /conselh/i;
 
 export default function OtherInterestsPage() {
   const { chairs, people, succession, activePage } = useApp();
@@ -24,8 +25,9 @@ export default function OtherInterestsPage() {
       ([1, 2] as const).forEach((qual) => {
         const raw = qual === 1 ? s.prioridade1 : s.prioridade2;
         if (!raw) return;
+        if (EH_CONSELHO.test(raw)) return; // vai para a aba Conselho
         if (prioridadeSemCadeira(succession, chairs, p.id, qual)) {
-          out.push({ key: `${p.id}-${qual}`, nome: p.nome, nivel: p.nivel, cargoAtual: p.cargo, qual, declarado: raw });
+          out.push({ key: `${p.id}-${qual}`, personId: p.id, nome: p.nome, declarado: raw });
         }
       });
     });
@@ -35,9 +37,7 @@ export default function OtherInterestsPage() {
   const filtered = useMemo(() => {
     const q = search.toLowerCase();
     if (!q) return rows;
-    return rows.filter(
-      (r) => r.nome.toLowerCase().includes(q) || r.cargoAtual.toLowerCase().includes(q) || r.declarado.toLowerCase().includes(q)
-    );
+    return rows.filter((r) => r.nome.toLowerCase().includes(q) || r.declarado.toLowerCase().includes(q));
   }, [rows, search]);
 
   return (
@@ -56,38 +56,18 @@ export default function OtherInterestsPage() {
       <div className="toolbar">
         <input
           type="search"
-          placeholder="Buscar por nome, cargo atual ou posição declarada…"
+          placeholder="Buscar por nome ou posição declarada…"
           value={search}
           onChange={(ev) => setSearch(ev.target.value)}
         />
         <span className="count">{filtered.length} de {rows.length} manifestações</span>
       </div>
 
-      <div className="table-wrap">
-        <table className="elig">
-          <thead>
-            <tr>
-              <th>Pessoa</th>
-              <th>Nível atual</th>
-              <th>Cargo atual</th>
-              <th>Prioridade</th>
-              <th>Posição declarada</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((r) => (
-              <tr key={r.key}>
-                <td>
-                  <b>{r.nome}</b>
-                </td>
-                <td>{r.nivel}</td>
-                <td>{r.cargoAtual}</td>
-                <td>{r.qual}ª</td>
-                <td>{r.declarado}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+      <div className="modal-sections" style={{ padding: 0, maxHeight: "none" }}>
+        {filtered.map((r) => (
+          <CandidateCard key={r.key} person={people.find((p) => p.id === r.personId)!} chair={cadeiraVirtual(r.declarado)} bucket="fora" />
+        ))}
+        {filtered.length === 0 ? <div className="modal-empty">Nenhuma manifestação encontrada.</div> : null}
       </div>
     </section>
   );
