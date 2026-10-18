@@ -246,13 +246,15 @@ export function tierDeElegibilidade(nivel: string, cargo: string): string {
   if (nivel === "Gerência" && ehGerenteDeRelacionamento(cargo)) return "Gerente de Relacionamento";
   return nivel;
 }
-// Para certos cargos, o pool elegível inclui também um nível lateral (mesmo tier da
-// própria cadeira), além do pool normal que a Hierarquia define vindo de baixo — ex.:
-// Gerente de P.A. aceita qualquer Gerência (de outras agências ou de áreas
-// administrativas) como candidato lateral, não só quem vem de Coordenação/Especialista.
-// Chave: cargo da cadeira normalizado.
+// Para certos cargos, o pool elegível inclui também níveis extras além do pool normal
+// que a Hierarquia define — ex.: Gerente de P.A. aceita qualquer Gerência (de outras
+// agências ou de áreas administrativas) como candidato lateral, não só quem vem de
+// Coordenação/Especialista; Agente de Relacionamento (nível Apoio, sem feeder próprio
+// na Hierarquia) recebe de Atendimento e de Assistente — a cadeira anterior na trilha
+// que sobe até Gerente de Relacionamento. Chave: cargo da cadeira normalizado.
 const FEEDER_NIVEL_EXTRA: Record<string, string[]> = {
   "gerente de p.a.": ["Gerência"],
+  "agente de relacionamento": ["Atendimento", "Assistente"],
 };
 export function feederPoolFor(hierMap: Record<string, string[]>, succession: SuccessionMap, people: Person[], chairs: Chair[], chair: Chair): Person[] {
   const chairTier = tierDeElegibilidade(chair.nivel, chair.cargo);

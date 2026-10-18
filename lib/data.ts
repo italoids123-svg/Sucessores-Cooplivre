@@ -420,6 +420,7 @@ export const HIERARQUIA: HierarquiaEntry[] = [
   { nivel: "Especialista", elegivel: "Coordenação" },
   { nivel: "Analista Sr", elegivel: "Analista Pl" },
   { nivel: "Analista Pl", elegivel: "Analista Jr" },
+  { nivel: "Analista Jr", elegivel: "Assistente" },
 ];
 
 export const LEVEL_GROUPS: Record<PageKey, string[]> = {
