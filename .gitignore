@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# local scratch/build scripts (not part of the app)
+/.pptxdata-tmp/
+/.bake-tmp/
