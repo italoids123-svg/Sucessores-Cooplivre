@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useApp } from "@/lib/context";
 import { CONT_BADGE, CONT_LABELS, CONV_BADGE, CONV_LABELS, CRITERIA } from "@/lib/criteria";
-import { aderenciaBand, favSubLabel, fmtNum, INT_MAP, nbResolve, scoreForChair } from "@/lib/scoring";
+import { aderenciaBand, favSubLabel, fmtNum, INT_MAP, motivoForaDaHierarquia, nbResolve, scoreForChair } from "@/lib/scoring";
 import type { Chair, Person } from "@/lib/types";
 
 export type CandidateBucket = "dentro" | "abaixo" | "fora";
@@ -17,6 +17,14 @@ const BAND_SHORT_LABEL: Record<string, string> = {
   low: "Baixa aderência",
 };
 
+// Por que a pessoa está "fora da hierarquia" — nível errado, mobilidade que não
+// alcança a cidade da cadeira, ou os dois (ver motivoForaDaHierarquia).
+const MOTIVO_FORA_LABEL: Record<string, string> = {
+  nivel: "Nível não elegível para esta posição",
+  mobilidade: "Nível elegível, mas fora do alcance da mobilidade declarada",
+  nivel_e_mobilidade: "Nível não elegível e fora do alcance da mobilidade declarada",
+};
+
 export default function CandidateCard({
   person,
   chair,
@@ -28,7 +36,7 @@ export default function CandidateCard({
   bucket: CandidateBucket;
   interestCargo?: string;
 }) {
-  const { succession, people } = useApp();
+  const { succession, people, chairs, hierMap } = useApp();
   const [open, setOpen] = useState(false);
 
   const sc = scoreForChair(succession, people, person.id, chair);
@@ -54,9 +62,10 @@ export default function CandidateCard({
 
   const statusCls = bucket === "fora" ? "fora" : band.cls;
   const statusLabel = bucket === "fora" ? "Fora da hierarquia" : BAND_SHORT_LABEL[band.cls];
+  const motivoFora = bucket === "fora" ? motivoForaDaHierarquia(hierMap, succession, people, chairs, person, chair) : null;
   const statusNote =
     bucket === "fora"
-      ? "Nível não elegível para esta posição"
+      ? MOTIVO_FORA_LABEL[motivoFora!]
       : bucket === "abaixo"
         ? `Abaixo do corte de ${CRITERIA.eligibilityThreshold} pontos`
         : null;

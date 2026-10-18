@@ -3,7 +3,7 @@
 import { useMemo, useState } from "react";
 import { useApp } from "@/lib/context";
 import { CRITERIA } from "@/lib/criteria";
-import { aderenciaBand, fmtNum, INT_MAP, interessesCruzadosUadAgencia } from "@/lib/scoring";
+import { aderenciaBand, fmtNum, INT_MAP, interessesCruzadosUadAgencia, motivoForaDaHierarquia } from "@/lib/scoring";
 import type { CrossBucket, GrupoUnidade } from "@/lib/scoring";
 
 const GRUPO_LABEL: Record<GrupoUnidade, string> = { uad: "UAD", agencias: "Agência" };
@@ -12,6 +12,12 @@ const STATUS_LABEL: Record<CrossBucket, string> = {
   dentro: "Dentro da aderência",
   abaixo: "Abaixo do corte",
   fora: "Fora da hierarquia",
+};
+
+const MOTIVO_FORA_LABEL: Record<string, string> = {
+  nivel: "Nível não elegível",
+  mobilidade: "Nível ok, mobilidade não alcança",
+  nivel_e_mobilidade: "Nível e mobilidade fora do alcance",
 };
 
 type Direcao = "" | "uad->agencias" | "agencias->uad";
@@ -87,6 +93,7 @@ export default function CrossInterestsPage() {
               const horizonteLabel = horizonteKey && INT_MAP[horizonteKey] ? INT_MAP[horizonteKey].label : null;
               const band = aderenciaBand(r.score.total);
               const statusCls = r.bucket === "fora" ? "fora" : band.cls;
+              const motivoFora = r.bucket === "fora" ? motivoForaDaHierarquia(hierMap, succession, people, chairs, r.person, r.chair) : null;
               return (
                 <tr key={r.key}>
                   <td>
@@ -127,6 +134,7 @@ export default function CrossInterestsPage() {
                     {r.bucket === "abaixo" ? (
                       <div className="cand-row-note">Abaixo do corte de {CRITERIA.eligibilityThreshold} pontos</div>
                     ) : null}
+                    {motivoFora ? <div className="cand-row-note">{MOTIVO_FORA_LABEL[motivoFora]}</div> : null}
                   </td>
                 </tr>
               );

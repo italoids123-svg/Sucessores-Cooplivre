@@ -266,6 +266,27 @@ export function feederPoolFor(hierMap: Record<string, string[]>, succession: Suc
     return feederLevels.length > 0 && feederLevels.includes(tierDeElegibilidade(p.nivel, p.cargo));
   });
 }
+// Por que uma pessoa "fora da hierarquia elegível" não entrou no pool elegível da
+// cadeira: nível errado (tier), mobilidade que não alcança a cidade da cadeira, ou os
+// dois — distingue o que antes aparecia sempre como "nível não elegível" mesmo quando
+// a causa real era só a mobilidade declarada (ex.: alguém do tier certo, mas cuja
+// mobilidade de 40 km não chega até a cidade da cadeira).
+export type MotivoFora = "nivel" | "mobilidade" | "nivel_e_mobilidade";
+export function motivoForaDaHierarquia(
+  hierMap: Record<string, string[]>,
+  succession: SuccessionMap,
+  people: Person[],
+  chairs: Chair[],
+  person: Person,
+  chair: Chair
+): MotivoFora {
+  const chairTier = tierDeElegibilidade(chair.nivel, chair.cargo);
+  const feederLevels = [...(hierMap[chairTier] || []), ...(FEEDER_NIVEL_EXTRA[normCargo(chair.cargo)] || [])];
+  const nivelOk = ehGerenteDeRelacionamento(person.cargo) || (feederLevels.length > 0 && feederLevels.includes(tierDeElegibilidade(person.nivel, person.cargo)));
+  const mobilidadeOk = mobilidadeAlcancaCidade(localidadeAtualDe(succession, chairs, person), chair.cidade, (succession[person.id] || {}).mobilidade);
+  if (!nivelOk && !mobilidadeOk) return "nivel_e_mobilidade";
+  return nivelOk ? "mobilidade" : "nivel";
+}
 // Ordena por aderência (score total para a cadeira), da maior para a menor.
 function sortByScoreDesc(succession: SuccessionMap, people: Person[], chair: Chair, candidates: Person[]): Person[] {
   return [...candidates].sort(
