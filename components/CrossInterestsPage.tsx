@@ -1,10 +1,11 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Fragment, useMemo, useState } from "react";
 import { useApp } from "@/lib/context";
 import { CRITERIA } from "@/lib/criteria";
 import { aderenciaBand, fmtNum, INT_MAP, interessesCruzadosUadAgencia, motivoForaDaHierarquia } from "@/lib/scoring";
 import type { CrossBucket, GrupoUnidade } from "@/lib/scoring";
+import ScoreDetail from "./ScoreDetail";
 
 const GRUPO_LABEL: Record<GrupoUnidade, string> = { uad: "UAD", agencias: "Agência" };
 
@@ -26,6 +27,15 @@ export default function CrossInterestsPage() {
   const { chairs, people, hierMap, succession, activePage } = useApp();
   const [search, setSearch] = useState("");
   const [direcao, setDirecao] = useState<Direcao>("");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (key: string) =>
+    setExpanded((cur) => {
+      const next = new Set(cur);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
 
   const rows = useMemo(
     () => interessesCruzadosUadAgencia(hierMap, succession, people, chairs),
@@ -84,6 +94,7 @@ export default function CrossInterestsPage() {
               <th>Prioridade</th>
               <th>Pontuação</th>
               <th>Status</th>
+              <th>Ações</th>
             </tr>
           </thead>
           <tbody>
@@ -94,54 +105,71 @@ export default function CrossInterestsPage() {
               const band = aderenciaBand(r.score.total);
               const statusCls = r.bucket === "fora" ? "fora" : band.cls;
               const motivoFora = r.bucket === "fora" ? motivoForaDaHierarquia(hierMap, succession, people, chairs, r.person, r.chair) : null;
+              const isOpen = expanded.has(r.key);
               return (
-                <tr key={r.key}>
-                  <td>
-                    <b>{r.person.nome}</b>
-                  </td>
-                  <td>
-                    {r.person.cargo} · {r.person.nivel}
-                  </td>
-                  <td>
-                    <span className={`group-pill group-${r.grupoAtual}`}>{GRUPO_LABEL[r.grupoAtual]}</span>
-                  </td>
-                  <td>
-                    {r.chair.cargo} · {r.chair.nivel}
-                  </td>
-                  <td>
-                    <span className={`group-pill group-${r.grupoDestino}`}>{GRUPO_LABEL[r.grupoDestino]}</span>
-                  </td>
-                  <td>
-                    {r.score.which ? (
-                      <>
-                        Prioridade {r.score.which}
-                        {horizonteLabel ? (
-                          <>
-                            <br />
-                            <span style={{ color: "var(--teal-dark)", fontSize: "11px" }}>{horizonteLabel}</span>
-                          </>
-                        ) : null}
-                      </>
-                    ) : (
-                      "—"
-                    )}
-                  </td>
-                  <td>
-                    <b>{fmtNum(r.score.total)}</b> pontos
-                  </td>
-                  <td>
-                    <span className={`cand-status-pill status-${statusCls}`}>{STATUS_LABEL[r.bucket]}</span>
-                    {r.bucket === "abaixo" ? (
-                      <div className="cand-row-note">Abaixo do corte de {CRITERIA.eligibilityThreshold} pontos</div>
-                    ) : null}
-                    {motivoFora ? <div className="cand-row-note">{MOTIVO_FORA_LABEL[motivoFora]}</div> : null}
-                  </td>
-                </tr>
+                <Fragment key={r.key}>
+                  <tr>
+                    <td>
+                      <b>{r.person.nome}</b>
+                    </td>
+                    <td>
+                      {r.person.cargo} · {r.person.nivel}
+                    </td>
+                    <td>
+                      <span className={`group-pill group-${r.grupoAtual}`}>{GRUPO_LABEL[r.grupoAtual]}</span>
+                    </td>
+                    <td>
+                      {r.chair.cargo} · {r.chair.nivel}
+                    </td>
+                    <td>
+                      <span className={`group-pill group-${r.grupoDestino}`}>{GRUPO_LABEL[r.grupoDestino]}</span>
+                    </td>
+                    <td>
+                      {r.score.which ? (
+                        <>
+                          Prioridade {r.score.which}
+                          {horizonteLabel ? (
+                            <>
+                              <br />
+                              <span style={{ color: "var(--teal-dark)", fontSize: "11px" }}>{horizonteLabel}</span>
+                            </>
+                          ) : null}
+                        </>
+                      ) : (
+                        "—"
+                      )}
+                    </td>
+                    <td>
+                      <b>{fmtNum(r.score.total)}</b> pontos
+                    </td>
+                    <td>
+                      <span className={`cand-status-pill status-${statusCls}`}>{STATUS_LABEL[r.bucket]}</span>
+                      {r.bucket === "abaixo" ? (
+                        <div className="cand-row-note">Abaixo do corte de {CRITERIA.eligibilityThreshold} pontos</div>
+                      ) : null}
+                      {motivoFora ? <div className="cand-row-note">{MOTIVO_FORA_LABEL[motivoFora]}</div> : null}
+                    </td>
+                    <td>
+                      <button className="cand-toggle" onClick={() => toggleExpanded(r.key)}>
+                        {isOpen ? "Ocultar detalhes –" : "Ver detalhes +"}
+                      </button>
+                    </td>
+                  </tr>
+                  {isOpen ? (
+                    <tr>
+                      <td colSpan={9}>
+                        <div className="cand-detail open">
+                          <ScoreDetail person={r.person} chair={r.chair} />
+                        </div>
+                      </td>
+                    </tr>
+                  ) : null}
+                </Fragment>
               );
             })}
             {filtered.length === 0 ? (
               <tr>
-                <td colSpan={8} style={{ textAlign: "center", color: "var(--muted)" }}>
+                <td colSpan={9} style={{ textAlign: "center", color: "var(--muted)" }}>
                   Nenhum interesse cruzado encontrado com esse filtro.
                 </td>
               </tr>
