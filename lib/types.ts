@@ -9,8 +9,6 @@ export type NavPage =
   | "eligibility"
   | "criteria"
   | "questionnaire"
-  | "mapa"
-  | "cidade"
   | "outros"
   | "conselho"
   | "cruzados";

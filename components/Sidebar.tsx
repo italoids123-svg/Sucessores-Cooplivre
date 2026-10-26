@@ -26,7 +26,7 @@ const METHOD_ITEMS: { key: NavPage; label: string }[] = [
 ];
 
 export default function Sidebar() {
-  const { activePage, setActivePage, cityLevelFilter, toggleCityLevelFilter } = useApp();
+  const { activePage, setActivePage } = useApp();
 
   return (
     <aside className="sidebar">
@@ -55,30 +55,16 @@ export default function Sidebar() {
       </div>
       <div className="nav-group">
         <div className="nav-group-title">Mapa Sucessório</div>
-        {MAP_ITEMS.map((item) => {
-          const onCity = activePage === "cidade";
-          const active = onCity ? cityLevelFilter === item.key : activePage === item.key;
-          return (
-            <button
-              key={item.key}
-              className={`nav-btn${active ? " active" : ""}`}
-              onClick={() => (onCity ? toggleCityLevelFilter(item.key) : setActivePage(item.key))}
-            >
-              <i></i>
-              {item.label}
-            </button>
-          );
-        })}
-      </div>
-      <div className="nav-group">
-        <div className="nav-group-title">Geografia</div>
-        <button
-          className={`nav-btn${activePage === "mapa" ? " active" : ""}`}
-          onClick={() => setActivePage("mapa")}
-        >
-          <i></i>
-          Mapa de Cidades
-        </button>
+        {MAP_ITEMS.map((item) => (
+          <button
+            key={item.key}
+            className={`nav-btn${activePage === item.key ? " active" : ""}`}
+            onClick={() => setActivePage(item.key)}
+          >
+            <i></i>
+            {item.label}
+          </button>
+        ))}
       </div>
       <div className="nav-group">
         <div className="nav-group-title">Análises</div>

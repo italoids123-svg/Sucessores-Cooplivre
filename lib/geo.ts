@@ -63,12 +63,6 @@ export function normalizeCidade(s?: string | null): string {
     .trim();
 }
 
-// Coordenadas de uma cidade cadastrada, ou null se não houver latitude/longitude
-// conhecida para ela (mapa não deve tentar plotar um marcador nesse caso).
-export function coordsFor(cidade: string): { lat: number; lng: number } | null {
-  return CITY_COORDS[normalizeCidade(cidade)] || null;
-}
-
 // Distância rodoviária estimada em km entre duas localidades: linha reta (Haversine)
 // × 1,20, mesma metodologia usada na análise de cobertura de rede da Cooplivre.
 // Retorna null quando alguma das cidades não está no cadastro de coordenadas —
