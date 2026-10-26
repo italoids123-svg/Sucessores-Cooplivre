@@ -39,6 +39,13 @@ export default function Sidebar() {
           <i></i>
           Visão geral
         </button>
+        <button
+          className={`nav-btn${activePage === "buscar" ? " active" : ""}`}
+          onClick={() => setActivePage("buscar")}
+        >
+          <i></i>
+          Buscar pessoa
+        </button>
       </div>
       <div className="nav-group">
         <div className="nav-group-title">Unidade</div>

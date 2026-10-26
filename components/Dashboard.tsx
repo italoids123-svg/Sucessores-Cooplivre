@@ -10,6 +10,7 @@ import LevelPages from "./LevelPages";
 import Notice from "./Notice";
 import OtherInterestsPage from "./OtherInterestsPage";
 import OverviewPage from "./OverviewPage";
+import PersonSearchPage from "./PersonSearchPage";
 import QuestionnairePage from "./QuestionnairePage";
 import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
@@ -24,6 +25,7 @@ export default function Dashboard() {
         <main>
           <Notice />
           <OverviewPage />
+          <PersonSearchPage />
           <AgencyGroupPage group="uad" />
           <AgencyGroupPage group="agencias" />
           <LevelPages />
