@@ -3,7 +3,7 @@
 import { useState } from "react";
 import { useApp } from "@/lib/context";
 import { CONT_BADGE, CONV_BADGE, CRITERIA } from "@/lib/criteria";
-import { aderenciaBand, fmtNum, INT_MAP, motivoForaDaHierarquia, scoreForChair } from "@/lib/scoring";
+import { aderenciaBand, fmtNum, INT_MAP, localidadeAtualDe, motivoForaDaHierarquia, scoreForChair } from "@/lib/scoring";
 import type { Chair, Person } from "@/lib/types";
 import ScoreDetail from "./ScoreDetail";
 
@@ -43,6 +43,7 @@ export default function CandidateCard({
   const sc = scoreForChair(succession, people, person.id, chair);
   const s = succession[person.id] || {};
   const band = aderenciaBand(sc.total);
+  const cidade = localidadeAtualDe(succession, chairs, person);
   const convBadge = s.conversaDesenvolvimento ? CONV_BADGE[s.conversaDesenvolvimento] : null;
   const contBadge = s.continuidade ? CONT_BADGE[s.continuidade] : null;
   const horizonteKey = sc.which === 1 ? s.horizonte1 : sc.which === 2 ? s.horizonte2 : null;
@@ -70,7 +71,8 @@ export default function CandidateCard({
         <div className="cand-row-id">
           <div className="cand-name">{person.nome}</div>
           <div className="cand-sub">
-            {person.cargo} · {person.nivel}
+            {person.cargo}
+            {cidade ? ` · ${cidade}` : ""}
           </div>
           {interestCargo ? <div className="cand-interest">Interesse: {interestCargo}</div> : null}
         </div>

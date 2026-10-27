@@ -219,7 +219,7 @@ export function aderenciaBand(total: number): { label: string; cls: string } {
 // Localidade atual da pessoa para fins de mobilidade: a resposta explícita do
 // questionário de interesse, ou — na ausência dela — a cidade da cadeira que ela
 // ocupa hoje.
-function localidadeAtualDe(succession: SuccessionMap, chairs: Chair[], person: Person): string | null {
+export function localidadeAtualDe(succession: SuccessionMap, chairs: Chair[], person: Person): string | null {
   const explicita = (succession[person.id] || {}).localidadeAtual;
   if (explicita) return explicita;
   const chairAtual = chairs.find((c) => c.id === person.chairId);
