@@ -1,12 +1,11 @@
 "use client";
 
-import { Fragment, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import CandidateCard, { type CandidateBucket } from "./CandidateCard";
 import { useApp } from "@/lib/context";
 import { CRITERIA } from "@/lib/criteria";
 import {
   INT_MAP,
-  MOB_MAP,
   cadeiraVirtual,
   feederPoolFor,
   interestMatch,
@@ -15,7 +14,7 @@ import {
   occupantLabel,
   scoreForChair,
 } from "@/lib/scoring";
-import type { Chair, Horizonte, Mobilidade, Person, SuccessionMap } from "@/lib/types";
+import type { Chair, Horizonte, Person, SuccessionMap } from "@/lib/types";
 
 interface InterestRow {
   key: string;
@@ -23,7 +22,6 @@ interface InterestRow {
   qual: 1 | 2;
   texto: string;
   horizonte: Horizonte | undefined;
-  mobilidade: Mobilidade | undefined;
   cidade: string | null;
 }
 
@@ -56,16 +54,7 @@ export default function PersonSearchPage() {
   const [prontidaoFilter, setProntidaoFilter] = useState("");
   const [cidadeFilter, setCidadeFilter] = useState("");
   const [qualFilter, setQualFilter] = useState<"" | "1" | "2">("");
-  const [mobilidadeFilter, setMobilidadeFilter] = useState("");
-  const [expanded, setExpanded] = useState<Set<string>>(new Set());
-
-  const toggleExpanded = (key: string) =>
-    setExpanded((cur) => {
-      const next = new Set(cur);
-      if (next.has(key)) next.delete(key);
-      else next.add(key);
-      return next;
-    });
+  const [cargoFilter, setCargoFilter] = useState("");
 
   const rows = useMemo(() => {
     const out: InterestRow[] = [];
@@ -81,7 +70,6 @@ export default function PersonSearchPage() {
           qual,
           texto: raw,
           horizonte: qual === 1 ? s.horizonte1 : s.horizonte2,
-          mobilidade: s.mobilidade,
           cidade,
         });
       });
@@ -94,6 +82,11 @@ export default function PersonSearchPage() {
     [rows]
   );
 
+  const cargoOptions = useMemo(
+    () => [...new Set(rows.map((r) => r.person.cargo))].sort((a, b) => a.localeCompare(b, "pt-BR")),
+    [rows]
+  );
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
@@ -101,10 +94,10 @@ export default function PersonSearchPage() {
       if (prontidaoFilter && r.horizonte !== prontidaoFilter) return false;
       if (cidadeFilter && r.cidade !== cidadeFilter) return false;
       if (qualFilter && String(r.qual) !== qualFilter) return false;
-      if (mobilidadeFilter && r.mobilidade !== mobilidadeFilter) return false;
+      if (cargoFilter && r.person.cargo !== cargoFilter) return false;
       return true;
     });
-  }, [rows, search, prontidaoFilter, cidadeFilter, qualFilter, mobilidadeFilter]);
+  }, [rows, search, prontidaoFilter, cidadeFilter, qualFilter, cargoFilter]);
 
   return (
     <section className={`page${activePage === "buscar" ? " active" : ""}`}>
@@ -113,8 +106,8 @@ export default function PersonSearchPage() {
           <div className="eyebrow">Mapa sucessório</div>
           <h1>Buscar pessoa</h1>
           <p>
-            Todas as pessoas que declararam interesse em alguma posição, com a prontidão, a mobilidade e a cidade
-            declaradas. Clique em uma linha para ver a pontuação de aderência calculada para a cadeira correspondente.
+            Todas as pessoas que declararam interesse em alguma posição, com a prontidão e a cidade declaradas.
+            Clique em &quot;Ver detalhes&quot; para ver a pontuação de aderência calculada para a cadeira correspondente.
           </p>
         </div>
       </div>
@@ -142,11 +135,11 @@ export default function PersonSearchPage() {
           <option value="1">Prioridade 1</option>
           <option value="2">Prioridade 2</option>
         </select>
-        <select value={mobilidadeFilter} onChange={(ev) => setMobilidadeFilter(ev.target.value)}>
-          <option value="">Mobilidade</option>
-          {Object.values(MOB_MAP).map((it) => (
-            <option key={it.key} value={it.key}>
-              {it.label}
+        <select value={cargoFilter} onChange={(ev) => setCargoFilter(ev.target.value)}>
+          <option value="">Posição de cargo</option>
+          {cargoOptions.map((c) => (
+            <option key={c} value={c}>
+              {c}
             </option>
           ))}
         </select>
@@ -155,76 +148,34 @@ export default function PersonSearchPage() {
         </span>
       </div>
 
-      <div className="table-wrap">
-        <table className="elig">
-          <thead>
-            <tr>
-              <th>Pessoa</th>
-              <th>Cargo atual</th>
-              <th>Cidade</th>
-              <th>Prioridade</th>
-              <th>Posição de interesse</th>
-              <th>Prontidão declarada</th>
-              <th>Mobilidade</th>
-              <th>Ações</th>
-            </tr>
-          </thead>
-          <tbody>
-            {filtered.map((r) => {
-              const isOpen = expanded.has(r.key);
-              const matches = isOpen ? matchesForRow(r, hierMap, succession, people, chairs) : [];
-              return (
-                <Fragment key={r.key}>
-                  <tr>
-                    <td>
-                      <b>{r.person.nome}</b>
-                    </td>
-                    <td>{r.person.cargo}</td>
-                    <td>{r.cidade || "—"}</td>
-                    <td>Prioridade {r.qual}</td>
-                    <td>{r.texto}</td>
-                    <td>{r.horizonte && INT_MAP[r.horizonte] ? INT_MAP[r.horizonte].label : "—"}</td>
-                    <td>{r.mobilidade && MOB_MAP[r.mobilidade] ? MOB_MAP[r.mobilidade].label : "—"}</td>
-                    <td>
-                      <button className="cand-toggle" onClick={() => toggleExpanded(r.key)}>
-                        {isOpen ? "Ocultar detalhes –" : "Ver detalhes +"}
-                      </button>
-                    </td>
-                  </tr>
-                  {isOpen ? (
-                    <tr>
-                      <td colSpan={8}>
-                        {matches.length ? (
-                          matches.map((m) => (
-                            <div key={r.key + m.chair.id}>
-                              {matches.length > 1 ? (
-                                <div className="person-match-chair">
-                                  Cadeira: {m.chair.cargo}
-                                  {m.chair.cidade ? ` · ${m.chair.cidade}` : ""} ·{" "}
-                                  {occupantLabel(m.chair) ? `ocupante: ${occupantLabel(m.chair)}` : "vaga"}
-                                </div>
-                              ) : null}
-                              <CandidateCard person={r.person} chair={m.chair} bucket={m.bucket} />
-                            </div>
-                          ))
-                        ) : (
-                          <CandidateCard person={r.person} chair={cadeiraVirtual(r.texto)} bucket="fora" interestCargo={r.texto} />
-                        )}
-                      </td>
-                    </tr>
-                  ) : null}
-                </Fragment>
-              );
-            })}
-            {filtered.length === 0 ? (
-              <tr>
-                <td colSpan={8} style={{ textAlign: "center", color: "var(--muted)" }}>
-                  Nenhuma manifestação encontrada com esse filtro.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
+      <div className="modal-sections" style={{ padding: 0, maxHeight: "none" }}>
+        {filtered.map((r) => {
+          const matches = matchesForRow(r, hierMap, succession, people, chairs);
+          if (!matches.length) {
+            return (
+              <CandidateCard
+                key={r.key}
+                person={r.person}
+                chair={cadeiraVirtual(r.texto)}
+                bucket="fora"
+                interestCargo={r.texto}
+              />
+            );
+          }
+          return matches.map((m) => (
+            <div key={r.key + m.chair.id}>
+              {matches.length > 1 ? (
+                <div className="person-match-chair">
+                  Cadeira: {m.chair.cargo}
+                  {m.chair.cidade ? ` · ${m.chair.cidade}` : ""} ·{" "}
+                  {occupantLabel(m.chair) ? `ocupante: ${occupantLabel(m.chair)}` : "vaga"}
+                </div>
+              ) : null}
+              <CandidateCard person={r.person} chair={m.chair} bucket={m.bucket} />
+            </div>
+          ));
+        })}
+        {filtered.length === 0 ? <div className="modal-empty">Nenhuma manifestação encontrada com esse filtro.</div> : null}
       </div>
     </section>
   );
