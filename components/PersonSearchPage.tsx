@@ -16,6 +16,31 @@ import {
 } from "@/lib/scoring";
 import type { Chair, Horizonte, Person, SuccessionMap } from "@/lib/types";
 
+type Categoria =
+  | "diretoria"
+  | "executiva"
+  | "gerencia_uad"
+  | "gerencia_pa"
+  | "gerencia_relacionamento"
+  | "coordenacao"
+  | "especialista"
+  | "analista"
+  | "outras"
+  | "demais_interesses";
+
+const CATEGORIAS: { key: Categoria; label: string }[] = [
+  { key: "diretoria", label: "CEO/Diretoria" },
+  { key: "executiva", label: "Gerência Executivas" },
+  { key: "gerencia_uad", label: "Gerências UAD" },
+  { key: "gerencia_pa", label: "Gerências de PA" },
+  { key: "gerencia_relacionamento", label: "Gerências de Relacionamento" },
+  { key: "coordenacao", label: "Coordenação" },
+  { key: "especialista", label: "Especialistas" },
+  { key: "analista", label: "Analistas" },
+  { key: "outras", label: "Outras Opções" },
+  { key: "demais_interesses", label: "Demais Interesses" },
+];
+
 interface InterestRow {
   key: string;
   person: Person;
@@ -23,11 +48,38 @@ interface InterestRow {
   texto: string;
   horizonte: Horizonte | undefined;
   cidade: string | null;
+  categoria: Categoria;
 }
 
 // "Não tenho interesse em uma segunda posição" e variantes — não é uma posição
 // declarada, não deve virar uma linha na lista.
 const SEM_INTERESSE = /^nao tenho interesse/;
+
+// Classifica a cadeira pelo mesmo agrupamento usado na navegação do mapa
+// sucessório, desdobrando "Gerência" em UAD/P.A./Relacionamento pelo padrão
+// textual do cargo (não há campo dedicado nos dados — mesma convenção de
+// lib/agency.ts).
+function categoriaDaCadeira(chair: Chair): Categoria {
+  const { nivel, cargo } = chair;
+  if (nivel === "C-Level" || nivel === "Diretoria") return "diretoria";
+  if (nivel === "Gerência Executiva") return "executiva";
+  if (nivel === "Gerência") {
+    if (cargo.includes("P.A.")) return "gerencia_pa";
+    if (cargo.includes("Relacionamento")) return "gerencia_relacionamento";
+    return "gerencia_uad";
+  }
+  if (nivel === "Coordenação") return "coordenacao";
+  if (nivel === "Especialista") return "especialista";
+  if (nivel.startsWith("Analista")) return "analista";
+  return "outras";
+}
+
+// Cadeiras reais cujo cargo corresponde ao texto declarado nessa prioridade —
+// mesma checagem de matchesForRow, mas sem o custo da pontuação (usada só
+// para classificar a linha num dos filtros de posição).
+function cadeirasDoTexto(person: Person, qual: 1 | 2, succession: SuccessionMap, chairs: Chair[]): Chair[] {
+  return chairs.filter((c) => interestMatch(succession, person, normCargo(c.cargo)) === qual);
+}
 
 function matchesForRow(
   row: InterestRow,
@@ -54,7 +106,7 @@ export default function PersonSearchPage() {
   const [prontidaoFilter, setProntidaoFilter] = useState("");
   const [cidadeFilter, setCidadeFilter] = useState("");
   const [qualFilter, setQualFilter] = useState<"" | "1" | "2">("");
-  const [cargoFilter, setCargoFilter] = useState("");
+  const [categoriaFilter, setCategoriaFilter] = useState<"" | Categoria>("");
 
   const rows = useMemo(() => {
     const out: InterestRow[] = [];
@@ -64,6 +116,7 @@ export default function PersonSearchPage() {
       ([1, 2] as const).forEach((qual) => {
         const raw = qual === 1 ? s.prioridade1 : s.prioridade2;
         if (!raw || SEM_INTERESSE.test(normCargo(raw))) return;
+        const cadeiras = cadeirasDoTexto(p, qual, succession, chairs);
         out.push({
           key: `${p.id}-${qual}`,
           person: p,
@@ -71,6 +124,7 @@ export default function PersonSearchPage() {
           texto: raw,
           horizonte: qual === 1 ? s.horizonte1 : s.horizonte2,
           cidade,
+          categoria: cadeiras.length ? categoriaDaCadeira(cadeiras[0]) : "demais_interesses",
         });
       });
     });
@@ -82,11 +136,6 @@ export default function PersonSearchPage() {
     [rows]
   );
 
-  const cargoOptions = useMemo(
-    () => [...new Set(rows.map((r) => r.person.cargo))].sort((a, b) => a.localeCompare(b, "pt-BR")),
-    [rows]
-  );
-
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
@@ -94,10 +143,10 @@ export default function PersonSearchPage() {
       if (prontidaoFilter && r.horizonte !== prontidaoFilter) return false;
       if (cidadeFilter && r.cidade !== cidadeFilter) return false;
       if (qualFilter && String(r.qual) !== qualFilter) return false;
-      if (cargoFilter && r.person.cargo !== cargoFilter) return false;
+      if (categoriaFilter && r.categoria !== categoriaFilter) return false;
       return true;
     });
-  }, [rows, search, prontidaoFilter, cidadeFilter, qualFilter, cargoFilter]);
+  }, [rows, search, prontidaoFilter, cidadeFilter, qualFilter, categoriaFilter]);
 
   return (
     <section className={`page${activePage === "buscar" ? " active" : ""}`}>
@@ -135,11 +184,11 @@ export default function PersonSearchPage() {
           <option value="1">Prioridade 1</option>
           <option value="2">Prioridade 2</option>
         </select>
-        <select value={cargoFilter} onChange={(ev) => setCargoFilter(ev.target.value)}>
+        <select value={categoriaFilter} onChange={(ev) => setCategoriaFilter(ev.target.value as "" | Categoria)}>
           <option value="">Posição de cargo</option>
-          {cargoOptions.map((c) => (
-            <option key={c} value={c}>
-              {c}
+          {CATEGORIAS.map((c) => (
+            <option key={c.key} value={c.key}>
+              {c.label}
             </option>
           ))}
         </select>
