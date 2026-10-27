@@ -2,8 +2,9 @@
 
 import { useApp } from "@/lib/context";
 import type { ChangeEvent } from "react";
+import { logout } from "@/app/actions/auth";
 
-export default function TopBar() {
+export default function TopBar({ userName }: { userName: string | null }) {
   const { downloadBase, uploadBase, resetBase } = useApp();
 
   function toggleFullscreen() {
@@ -69,6 +70,17 @@ export default function TopBar() {
           </svg>
           Limpar dados salvos
         </button>
+        {userName ? (
+          <form action={logout} className="user-badge">
+            <span title={userName}>{userName}</span>
+            <button className="action" type="submit" title="Sair">
+              <svg viewBox="0 0 24 24">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4M16 17l5-5-5-5M21 12H9"></path>
+              </svg>
+              Sair
+            </button>
+          </form>
+        ) : null}
       </div>
     </header>
   );

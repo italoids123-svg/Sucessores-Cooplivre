@@ -16,10 +16,10 @@ import Sidebar from "./Sidebar";
 import TopBar from "./TopBar";
 import { AppProvider } from "@/lib/context";
 
-export default function Dashboard() {
+export default function Dashboard({ userName }: { userName: string | null }) {
   return (
     <AppProvider>
-      <TopBar />
+      <TopBar userName={userName} />
       <div className="shell">
         <Sidebar />
         <main>

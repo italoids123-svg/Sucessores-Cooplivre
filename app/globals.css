@@ -314,3 +314,22 @@ table.qtable tbody tr.nat-amber td:first-child{border-left-color:var(--amber)}
 .q-badge.pts-nao{background:var(--gray-light);color:#55666a}
 .q-format-label{font-size:9.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--teal);font-weight:800}
 .q-format-value{font-size:11.5px;color:var(--ink);margin-top:3px;max-width:280px}
+
+/* ---- Login ---- */
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(160deg,var(--teal-dark),var(--teal));padding:24px}
+.login-card{width:100%;max-width:360px;background:#fff;border-radius:var(--radius);box-shadow:var(--shadow);padding:30px 28px}
+.login-brand{display:flex;align-items:baseline;gap:8px;margin-bottom:18px}
+.login-brand b{font-size:19px;font-weight:800;letter-spacing:-.02em;color:var(--ink)}
+.login-brand span{font-size:10px;text-transform:uppercase;letter-spacing:1.4px;color:var(--muted);font-weight:700}
+.login-card h1{font-size:21px;margin-bottom:4px}
+.login-sub{font-size:12.5px;color:var(--muted);margin:0 0 20px;line-height:1.5}
+.login-field{display:flex;flex-direction:column;gap:5px;font-size:12px;font-weight:700;color:var(--ink);margin-bottom:14px}
+.login-field input{border:1px solid var(--line);border-radius:9px;padding:10px 12px;font-size:13.5px;font-weight:400;background:var(--paper)}
+.login-field input:focus{outline:2px solid var(--teal-light);border-color:var(--teal)}
+.login-error{background:var(--red-light);color:var(--red);border-radius:8px;padding:9px 12px;font-size:12.5px;font-weight:600;margin-bottom:14px}
+.login-submit{width:100%;background:var(--teal);color:#fff;border:0;border-radius:9px;padding:11px;font-size:13.5px;font-weight:700}
+.login-submit:hover{background:var(--teal-dark)}
+.login-submit:disabled{opacity:.6;cursor:default}
+
+.user-badge{display:flex;align-items:center;gap:8px;margin-left:4px}
+.user-badge span{font-size:12px;font-weight:700;color:#fff;max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
