@@ -162,6 +162,14 @@ export default function PersonSearchPage() {
       </div>
 
       <div className="toolbar">
+        <select value={categoriaFilter} onChange={(ev) => setCategoriaFilter(ev.target.value as "" | Categoria)}>
+          <option value="">Posição de cargo</option>
+          {CATEGORIAS.map((c) => (
+            <option key={c.key} value={c.key}>
+              {c.label}
+            </option>
+          ))}
+        </select>
         <input type="search" placeholder="Buscar por nome…" value={search} onChange={(ev) => setSearch(ev.target.value)} />
         <select value={prontidaoFilter} onChange={(ev) => setProntidaoFilter(ev.target.value)}>
           <option value="">Prontidão declarada</option>
@@ -184,14 +192,6 @@ export default function PersonSearchPage() {
           <option value="1">Prioridade 1</option>
           <option value="2">Prioridade 2</option>
         </select>
-        <select value={categoriaFilter} onChange={(ev) => setCategoriaFilter(ev.target.value as "" | Categoria)}>
-          <option value="">Posição de cargo</option>
-          {CATEGORIAS.map((c) => (
-            <option key={c.key} value={c.key}>
-              {c.label}
-            </option>
-          ))}
-        </select>
         <span className="count">
           {filtered.length} de {rows.length} manifestações
         </span>
@@ -213,13 +213,11 @@ export default function PersonSearchPage() {
           }
           return matches.map((m) => (
             <div key={r.key + m.chair.id}>
-              {matches.length > 1 ? (
-                <div className="person-match-chair">
-                  Cadeira: {m.chair.cargo}
-                  {m.chair.cidade ? ` · ${m.chair.cidade}` : ""} ·{" "}
-                  {occupantLabel(m.chair) ? `ocupante: ${occupantLabel(m.chair)}` : "vaga"}
-                </div>
-              ) : null}
+              <div className="person-match-chair">
+                Cadeira: {m.chair.cargo}
+                {m.chair.cidade ? ` · ${m.chair.cidade}` : ""} ·{" "}
+                {occupantLabel(m.chair) ? `ocupante: ${occupantLabel(m.chair)}` : "vaga"}
+              </div>
               <CandidateCard person={r.person} chair={m.chair} bucket={m.bucket} />
             </div>
           ));
