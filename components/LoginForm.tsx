@@ -18,8 +18,8 @@ export default function LoginForm() {
       <p className="login-sub">Acesso restrito. Informe seu usuário e senha para continuar.</p>
 
       <label className="login-field">
-        Usuário
-        <input name="usuario" type="text" autoComplete="username" required autoFocus />
+        Usuário ou nome
+        <input name="usuario" type="text" autoComplete="username" placeholder="ex: Italo ou Italo Leal dos Santos" required autoFocus />
       </label>
       <label className="login-field">
         Senha
