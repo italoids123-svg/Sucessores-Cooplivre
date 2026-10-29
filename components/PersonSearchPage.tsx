@@ -1,17 +1,17 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import CandidateCard, { type CandidateBucket } from "./CandidateCard";
+import type { CandidateBucket } from "./CandidateCard";
 import { useApp } from "@/lib/context";
 import { CRITERIA } from "@/lib/criteria";
 import {
   INT_MAP,
+  MOB_MAP,
   cadeiraVirtual,
   feederPoolFor,
   interestMatch,
   localidadeAtualDe,
   normCargo,
-  occupantLabel,
   scoreForChair,
 } from "@/lib/scoring";
 import type { Chair, Horizonte, Person, SuccessionMap } from "@/lib/types";
@@ -41,19 +41,42 @@ const CATEGORIAS: { key: Categoria; label: string }[] = [
   { key: "demais_interesses", label: "Demais Interesses" },
 ];
 
-interface InterestRow {
-  key: string;
-  person: Person;
-  qual: 1 | 2;
-  texto: string;
-  horizonte: Horizonte | undefined;
-  cidade: string | null;
-  categoria: Categoria;
-}
+const STATUS_LABEL: Record<CandidateBucket, string> = {
+  dentro: "Dentro da aderência",
+  abaixo: "Abaixo da aderência",
+  fora: "Fora da hierarquia",
+};
+const STATUS_CLS: Record<CandidateBucket, string> = { dentro: "hi", abaixo: "low", fora: "fora" };
 
 // "Não tenho interesse em uma segunda posição" e variantes — não é uma posição
 // declarada, não deve virar uma linha na lista.
 const SEM_INTERESSE = /^nao tenho interesse/;
+
+interface Declaracao {
+  qual: 1 | 2;
+  texto: string;
+  horizonte: Horizonte | undefined;
+}
+
+interface PositionMatch {
+  chair: Chair;
+  qual: 1 | 2;
+  score: number;
+  bucket: CandidateBucket;
+  real: boolean;
+}
+
+interface PersonRow {
+  key: string;
+  person: Person;
+  cidade: string | null;
+  mobilidadeLabel: string | null;
+  declaracoes: Declaracao[];
+  matches: PositionMatch[];
+  bestScore: number | null;
+  bestBucket: CandidateBucket | null;
+  categoria: Categoria;
+}
 
 // Classifica a cadeira pelo mesmo agrupamento usado na navegação do mapa
 // sucessório, desdobrando "Gerência" em UAD/P.A./Relacionamento pelo padrão
@@ -74,62 +97,91 @@ function categoriaDaCadeira(chair: Chair): Categoria {
   return "outras";
 }
 
-// Cadeiras reais cujo cargo corresponde ao texto declarado nessa prioridade —
-// mesma checagem de matchesForRow, mas sem o custo da pontuação (usada só
-// para classificar a linha num dos filtros de posição).
-function cadeirasDoTexto(person: Person, qual: 1 | 2, succession: SuccessionMap, chairs: Chair[]): Chair[] {
-  return chairs.filter((c) => interestMatch(succession, person, normCargo(c.cargo)) === qual);
+function initials(nome: string): string {
+  const parts = nome.trim().split(/\s+/);
+  const first = parts[0]?.[0] || "";
+  const last = parts.length > 1 ? parts[parts.length - 1][0] : "";
+  return (first + last).toUpperCase();
 }
 
-function matchesForRow(
-  row: InterestRow,
+// Todas as posições em que a pessoa aparece como candidata, somando as duas
+// prioridades declaradas. Quando uma prioridade não corresponde a nenhuma
+// cadeira real, entra como um item não clicável (sem modal) para a pontuação
+// e a situação continuarem visíveis.
+function matchesForPerson(
+  person: Person,
+  declaracoes: Declaracao[],
   hierMap: Record<string, string[]>,
   succession: SuccessionMap,
   people: Person[],
   chairs: Chair[]
-): { chair: Chair; bucket: CandidateBucket; score: number }[] {
-  const out: { chair: Chair; bucket: CandidateBucket; score: number }[] = [];
-  chairs.forEach((chair) => {
-    if (interestMatch(succession, row.person, normCargo(chair.cargo)) !== row.qual) return;
-    const inPool = feederPoolFor(hierMap, succession, people, chairs, chair).some((p) => p.id === row.person.id);
-    const sc = scoreForChair(succession, people, row.person.id, chair);
-    const bucket: CandidateBucket = !inPool ? "fora" : sc.total >= CRITERIA.eligibilityThreshold ? "dentro" : "abaixo";
-    out.push({ chair, bucket, score: sc.total });
+): PositionMatch[] {
+  const out: PositionMatch[] = [];
+  declaracoes.forEach((d) => {
+    const reais = chairs.filter((c) => interestMatch(succession, person, normCargo(c.cargo)) === d.qual);
+    if (!reais.length) {
+      const virtual = cadeiraVirtual(d.texto);
+      const sc = scoreForChair(succession, people, person.id, virtual);
+      out.push({ chair: virtual, qual: d.qual, score: sc.total, bucket: "fora", real: false });
+      return;
+    }
+    reais.forEach((chair) => {
+      const inPool = feederPoolFor(hierMap, succession, people, chairs, chair).some((p) => p.id === person.id);
+      const sc = scoreForChair(succession, people, person.id, chair);
+      const bucket: CandidateBucket = !inPool ? "fora" : sc.total >= CRITERIA.eligibilityThreshold ? "dentro" : "abaixo";
+      out.push({ chair, qual: d.qual, score: sc.total, bucket, real: true });
+    });
   });
   out.sort((a, b) => b.score - a.score);
   return out;
 }
 
 export default function PersonSearchPage() {
-  const { chairs, people, hierMap, succession, activePage } = useApp();
+  const { chairs, people, hierMap, succession, activePage, openModal } = useApp();
   const [search, setSearch] = useState("");
   const [prontidaoFilter, setProntidaoFilter] = useState("");
   const [cidadeFilter, setCidadeFilter] = useState("");
   const [qualFilter, setQualFilter] = useState<"" | "1" | "2">("");
   const [categoriaFilter, setCategoriaFilter] = useState<"" | Categoria>("");
+  const [expanded, setExpanded] = useState<Set<string>>(new Set());
+
+  const toggleExpanded = (key: string) =>
+    setExpanded((cur) => {
+      const next = new Set(cur);
+      if (next.has(key)) next.delete(key);
+      else next.add(key);
+      return next;
+    });
 
   const rows = useMemo(() => {
-    const out: InterestRow[] = [];
+    const out: PersonRow[] = [];
     people.forEach((p) => {
       const s = succession[p.id] || {};
-      const cidade = localidadeAtualDe(succession, chairs, p);
+      const declaracoes: Declaracao[] = [];
       ([1, 2] as const).forEach((qual) => {
         const raw = qual === 1 ? s.prioridade1 : s.prioridade2;
         if (!raw || SEM_INTERESSE.test(normCargo(raw))) return;
-        const cadeiras = cadeirasDoTexto(p, qual, succession, chairs);
-        out.push({
-          key: `${p.id}-${qual}`,
-          person: p,
-          qual,
-          texto: raw,
-          horizonte: qual === 1 ? s.horizonte1 : s.horizonte2,
-          cidade,
-          categoria: cadeiras.length ? categoriaDaCadeira(cadeiras[0]) : "demais_interesses",
-        });
+        declaracoes.push({ qual, texto: raw, horizonte: qual === 1 ? s.horizonte1 : s.horizonte2 });
+      });
+      if (!declaracoes.length) return;
+
+      const matches = matchesForPerson(p, declaracoes, hierMap, succession, people, chairs);
+      const top = matches[0];
+      out.push({
+        key: p.id,
+        person: p,
+        cidade: localidadeAtualDe(succession, chairs, p),
+        mobilidadeLabel: s.mobilidade && MOB_MAP[s.mobilidade] ? MOB_MAP[s.mobilidade].label : null,
+        declaracoes,
+        matches,
+        bestScore: top ? top.score : null,
+        bestBucket: top ? top.bucket : null,
+        categoria: top && top.real ? categoriaDaCadeira(top.chair) : "demais_interesses",
       });
     });
-    return out.sort((a, b) => a.person.nome.localeCompare(b.person.nome, "pt-BR") || a.qual - b.qual);
-  }, [people, succession, chairs]);
+    out.sort((a, b) => (b.bestScore ?? -1) - (a.bestScore ?? -1) || a.person.nome.localeCompare(b.person.nome, "pt-BR"));
+    return out;
+  }, [people, succession, chairs, hierMap]);
 
   const cidadeOptions = useMemo(
     () => [...new Set(rows.map((r) => r.cidade).filter((c): c is string => !!c))].sort((a, b) => a.localeCompare(b, "pt-BR")),
@@ -140,9 +192,9 @@ export default function PersonSearchPage() {
     const q = search.trim().toLowerCase();
     return rows.filter((r) => {
       if (q && !r.person.nome.toLowerCase().includes(q)) return false;
-      if (prontidaoFilter && r.horizonte !== prontidaoFilter) return false;
+      if (prontidaoFilter && !r.declaracoes.some((d) => d.horizonte === prontidaoFilter)) return false;
       if (cidadeFilter && r.cidade !== cidadeFilter) return false;
-      if (qualFilter && String(r.qual) !== qualFilter) return false;
+      if (qualFilter && !r.declaracoes.some((d) => String(d.qual) === qualFilter)) return false;
       if (categoriaFilter && r.categoria !== categoriaFilter) return false;
       return true;
     });
@@ -154,10 +206,7 @@ export default function PersonSearchPage() {
         <div>
           <div className="eyebrow">Mapa sucessório</div>
           <h1>Buscar pessoa</h1>
-          <p>
-            Todas as pessoas que declararam interesse em alguma posição, com a prontidão e a cidade declaradas.
-            Clique em &quot;Ver detalhes&quot; para ver a pontuação de aderência calculada para a cadeira correspondente.
-          </p>
+          <p>Todas as pessoas que declararam interesse em alguma posição, e onde cada uma aparece como candidata.</p>
         </div>
       </div>
 
@@ -193,36 +242,93 @@ export default function PersonSearchPage() {
           <option value="2">Prioridade 2</option>
         </select>
         <span className="count">
-          {filtered.length} de {rows.length} manifestações
+          {filtered.length} de {rows.length} pessoas interessadas
         </span>
       </div>
 
-      <div className="modal-sections" style={{ padding: 0, maxHeight: "none" }}>
+      <div className="person-list">
         {filtered.map((r) => {
-          const matches = matchesForRow(r, hierMap, succession, people, chairs);
-          if (!matches.length) {
-            return (
-              <CandidateCard
-                key={r.key}
-                person={r.person}
-                chair={cadeiraVirtual(r.texto)}
-                bucket="fora"
-                interestCargo={r.texto}
-              />
-            );
-          }
-          return matches.map((m) => (
-            <div key={r.key + m.chair.id}>
-              <div className="person-match-chair">
-                Cadeira: {m.chair.cargo}
-                {m.chair.cidade ? ` · ${m.chair.cidade}` : ""} ·{" "}
-                {occupantLabel(m.chair) ? `ocupante: ${occupantLabel(m.chair)}` : "vaga"}
+          const isOpen = expanded.has(r.key);
+          return (
+            <div key={r.key} className="person-row">
+              <div className="person-row-top">
+                <div className="person-avatar">{initials(r.person.nome)}</div>
+                <div className="person-id">
+                  <div className="name">{r.person.nome}</div>
+                  <div className="sub">
+                    {r.person.cargo} · {r.person.nivel}
+                    {succession[r.person.id]?.lideraEquipe ? " · Líder" : ""}
+                  </div>
+                  <div className="sub">
+                    {r.cidade || "—"}
+                    {r.mobilidadeLabel ? ` · Mobilidade: ${r.mobilidadeLabel}` : ""}
+                  </div>
+                </div>
+                <div className="person-prios">
+                  {r.declaracoes.map((d) => (
+                    <div key={d.qual}>
+                      <b>P{d.qual}</b> {d.texto}
+                      {d.horizonte && INT_MAP[d.horizonte] ? <span className="hz"> · {INT_MAP[d.horizonte].label}</span> : null}
+                    </div>
+                  ))}
+                </div>
+                <div className="person-score">
+                  <b>{r.bestScore !== null ? r.bestScore.toLocaleString("pt-BR", { maximumFractionDigits: 1 }) : "—"}</b>
+                  <span>melhor pontuação</span>
+                </div>
+                <div className="person-status">
+                  {r.bestBucket ? (
+                    <span className={`cand-status-pill status-${STATUS_CLS[r.bestBucket]}`}>{STATUS_LABEL[r.bestBucket]}</span>
+                  ) : null}
+                </div>
+                <button className="cand-toggle" onClick={() => toggleExpanded(r.key)}>
+                  {isOpen ? `Ocultar posições –` : `Ver posições (${r.matches.length}) +`}
+                </button>
               </div>
-              <CandidateCard person={r.person} chair={m.chair} bucket={m.bucket} />
+
+              {isOpen ? (
+                <div className="person-positions">
+                  <h5>Posições em que aparece como candidata</h5>
+                  <div className="table-wrap">
+                    <table className="elig">
+                      <thead>
+                        <tr>
+                          <th>Posição</th>
+                          <th>Ocupante atual</th>
+                          <th>Cidade</th>
+                          <th>Situação</th>
+                          <th>Pontos</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {r.matches.map((m) => (
+                          <tr key={m.chair.id + m.qual}>
+                            <td>
+                              {m.real ? (
+                                <button className="row-link" onClick={() => openModal(m.chair.id)}>
+                                  {m.chair.cargo}
+                                </button>
+                              ) : (
+                                <span>{m.chair.cargo} (sem cadeira correspondente)</span>
+                              )}
+                            </td>
+                            <td>{m.real ? (m.chair.vago ? "Vaga" : m.chair.nome) : "—"}</td>
+                            <td>{m.real ? m.chair.cidade || "—" : "—"}</td>
+                            <td>
+                              <span className={`cand-status-pill status-${STATUS_CLS[m.bucket]}`}>{STATUS_LABEL[m.bucket]}</span>
+                            </td>
+                            <td>{m.score.toLocaleString("pt-BR", { maximumFractionDigits: 1 })}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : null}
             </div>
-          ));
+          );
         })}
-        {filtered.length === 0 ? <div className="modal-empty">Nenhuma manifestação encontrada com esse filtro.</div> : null}
+        {filtered.length === 0 ? <div className="modal-empty">Nenhuma pessoa encontrada com esse filtro.</div> : null}
       </div>
     </section>
   );

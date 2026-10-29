@@ -90,7 +90,23 @@ main{flex:1;min-width:0;padding:26px 30px 60px}
 
 .chair-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
 
-.person-match-chair{font-size:11px;color:var(--teal-dark);font-weight:700;margin:10px 0 4px;text-transform:uppercase;letter-spacing:.3px}
+.person-list{display:flex;flex-direction:column;gap:10px}
+.person-row{background:#fff;border:1px solid var(--line);border-radius:10px;padding:14px 16px;box-shadow:var(--shadow)}
+.person-row-top{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
+.person-avatar{flex:0 0 42px;width:42px;height:42px;border-radius:50%;background:var(--teal-light);color:var(--teal-dark);display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px}
+.person-id{flex:1 1 220px;min-width:190px}
+.person-id .name{font-weight:800;font-size:14px;color:var(--ink)}
+.person-id .sub{font-size:11.5px;color:var(--muted);margin-top:2px;line-height:1.4}
+.person-prios{flex:0 0 240px;display:flex;flex-direction:column;gap:3px;font-size:12px;color:var(--ink)}
+.person-prios b{color:var(--teal-dark);margin-right:3px}
+.person-prios .hz{color:var(--muted)}
+.person-score{flex:0 0 92px;text-align:center}
+.person-score b{display:block;font-size:19px;color:var(--ink)}
+.person-score span{display:block;font-size:10px;color:var(--muted)}
+.person-status{flex:0 0 150px}
+
+.person-positions{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
+.person-positions h5{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;margin:0 0 8px}
 
 .chair-card{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gray);border-radius:10px;padding:16px 18px;box-shadow:var(--shadow);cursor:pointer}
 .chair-card.st-hi{border-left-color:var(--green)}
